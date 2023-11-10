@@ -4,7 +4,7 @@
 		{
 			"name": "Launch Hypercasual (Debug)",
 			"request": "launch",
-			"program": "C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\Binaries\\Win64\\UnrealGame-Win64-Debug.exe",
+			"program": "C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Binaries\\Win64\\UnrealGame-Win64-Debug.exe",
 			"preLaunchTask": "Hypercasual Win64 Debug Build",
 			"args": [
 			],
@@ -20,7 +20,7 @@
 		{
 			"name": "Launch Hypercasual (DebugGame)",
 			"request": "launch",
-			"program": "C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\Binaries\\Win64\\UnrealGame-Win64-DebugGame.exe",
+			"program": "C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Binaries\\Win64\\UnrealGame-Win64-DebugGame.exe",
 			"preLaunchTask": "Hypercasual Win64 DebugGame Build",
 			"args": [
 			],
@@ -36,7 +36,7 @@
 		{
 			"name": "Launch Hypercasual (Development)",
 			"request": "launch",
-			"program": "C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\Binaries\\Win64\\UnrealGame.exe",
+			"program": "C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Binaries\\Win64\\UnrealGame.exe",
 			"preLaunchTask": "Hypercasual Win64 Development Build",
 			"args": [
 			],
@@ -52,7 +52,7 @@
 		{
 			"name": "Launch Hypercasual (Test)",
 			"request": "launch",
-			"program": "C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\Binaries\\Win64\\UnrealGame-Win64-Test.exe",
+			"program": "C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Binaries\\Win64\\UnrealGame-Win64-Test.exe",
 			"preLaunchTask": "Hypercasual Win64 Test Build",
 			"args": [
 			],
@@ -68,7 +68,7 @@
 		{
 			"name": "Launch Hypercasual (Shipping)",
 			"request": "launch",
-			"program": "C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\Binaries\\Win64\\UnrealGame-Win64-Shipping.exe",
+			"program": "C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Binaries\\Win64\\UnrealGame-Win64-Shipping.exe",
 			"preLaunchTask": "Hypercasual Win64 Shipping Build",
 			"args": [
 			],
@@ -87,7 +87,7 @@
 			"program": "C:\\Program Files\\Epic Games\\UE_5.2\\Engine\\Binaries\\Win64\\UnrealEditor-Win64-Debug.exe",
 			"preLaunchTask": "HypercasualEditor Win64 Debug Build",
 			"args": [
-				"C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\Hypercasual.uproject"
+				"C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Hypercasual.uproject"
 			],
 			"cwd": "C:\\Program Files\\Epic Games\\UE_5.2",
 			"stopAtEntry": false,
@@ -104,7 +104,7 @@
 			"program": "C:\\Program Files\\Epic Games\\UE_5.2\\Engine\\Binaries\\Win64\\UnrealEditor-Win64-DebugGame.exe",
 			"preLaunchTask": "HypercasualEditor Win64 DebugGame Build",
 			"args": [
-				"C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\Hypercasual.uproject"
+				"C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Hypercasual.uproject"
 			],
 			"cwd": "C:\\Program Files\\Epic Games\\UE_5.2",
 			"stopAtEntry": false,
@@ -121,7 +121,7 @@
 			"program": "C:\\Program Files\\Epic Games\\UE_5.2\\Engine\\Binaries\\Win64\\UnrealEditor.exe",
 			"preLaunchTask": "HypercasualEditor Win64 Development Build",
 			"args": [
-				"C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\Hypercasual.uproject"
+				"C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Hypercasual.uproject"
 			],
 			"cwd": "C:\\Program Files\\Epic Games\\UE_5.2",
 			"stopAtEntry": false,
@@ -140,7 +140,7 @@
 			"args": [
 				"-projectfiles",
 				"-vscode",
-				"-project=C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\Hypercasual.uproject",
+				"-project=C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Hypercasual.uproject",
 				"-game",
 				"-engine"
 			],

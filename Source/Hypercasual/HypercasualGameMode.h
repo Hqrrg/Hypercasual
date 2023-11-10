@@ -11,9 +11,18 @@ class AHypercasualGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
+private:
+	void SpawnNextTile();
+
+	FTransform NextTileTransform;
+
+protected:
+	virtual void BeginPlay() override;
+
 public:
 	AHypercasualGameMode();
 };
+
 
 
 

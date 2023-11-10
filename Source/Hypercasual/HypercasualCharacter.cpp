@@ -108,16 +108,6 @@ void AHypercasualCharacter::Move(const FInputActionValue& Value)
 		// add movement 
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
-
-		// Shift world origin to avoid floating point errors.
-		// Broken - causes visual artifacts & glitchiness.
-		
-		// FVector PlayerLoc = GetActorLocation();
-		// UWorld* World = GetWorld();
-
-		// if (FMath::Abs(PlayerLoc.X) > 100 || FMath::Abs(PlayerLoc.Y) > 100 || FMath::Abs(PlayerLoc.Z) > 100) {
-		// 	World->SetNewWorldOrigin(FIntVector(PlayerLoc.X, PlayerLoc.Y, PlayerLoc.Z) + World->OriginLocation);
-		// }
 	}
 }
 

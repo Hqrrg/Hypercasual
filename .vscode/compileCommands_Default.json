@@ -1,73 +1,105 @@
 [
 	{
-		"file": "C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\Hypercasual.Build.cs",
+		"file": "C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\BoulderController.cpp",
 		"arguments": [
-			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\Hostx64\\x64\\cl.exe",
-			"@C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.259.rsp"
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.261.rsp"
 		],
 		"directory": "C:\\Program Files\\Epic Games\\UE_5.2\\Engine\\Source"
 	},
 	{
-		"file": "C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\Hypercasual.cpp",
+		"file": "C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\BoulderController.h",
 		"arguments": [
-			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\Hostx64\\x64\\cl.exe",
-			"@C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.259.rsp"
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.261.rsp"
 		],
 		"directory": "C:\\Program Files\\Epic Games\\UE_5.2\\Engine\\Source"
 	},
 	{
-		"file": "C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\Hypercasual.h",
+		"file": "C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\BoulderPawn.cpp",
 		"arguments": [
-			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\Hostx64\\x64\\cl.exe",
-			"@C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.259.rsp"
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.261.rsp"
 		],
 		"directory": "C:\\Program Files\\Epic Games\\UE_5.2\\Engine\\Source"
 	},
 	{
-		"file": "C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\HypercasualCharacter.cpp",
+		"file": "C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\BoulderPawn.h",
 		"arguments": [
-			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\Hostx64\\x64\\cl.exe",
-			"@C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.259.rsp"
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.261.rsp"
 		],
 		"directory": "C:\\Program Files\\Epic Games\\UE_5.2\\Engine\\Source"
 	},
 	{
-		"file": "C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\HypercasualCharacter.h",
+		"file": "C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\Hypercasual.Build.cs",
 		"arguments": [
-			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\Hostx64\\x64\\cl.exe",
-			"@C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.259.rsp"
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.261.rsp"
 		],
 		"directory": "C:\\Program Files\\Epic Games\\UE_5.2\\Engine\\Source"
 	},
 	{
-		"file": "C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\HypercasualGameMode.cpp",
+		"file": "C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\Hypercasual.cpp",
 		"arguments": [
-			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\Hostx64\\x64\\cl.exe",
-			"@C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.259.rsp"
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.261.rsp"
 		],
 		"directory": "C:\\Program Files\\Epic Games\\UE_5.2\\Engine\\Source"
 	},
 	{
-		"file": "C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\HypercasualGameMode.h",
+		"file": "C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\Hypercasual.h",
 		"arguments": [
-			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\Hostx64\\x64\\cl.exe",
-			"@C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.259.rsp"
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.261.rsp"
 		],
 		"directory": "C:\\Program Files\\Epic Games\\UE_5.2\\Engine\\Source"
 	},
 	{
-		"file": "C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\Tile.cpp",
+		"file": "C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\HypercasualCharacter.cpp",
 		"arguments": [
-			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\Hostx64\\x64\\cl.exe",
-			"@C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.259.rsp"
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.261.rsp"
 		],
 		"directory": "C:\\Program Files\\Epic Games\\UE_5.2\\Engine\\Source"
 	},
 	{
-		"file": "C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\Tile.h",
+		"file": "C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\HypercasualCharacter.h",
 		"arguments": [
-			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\Hostx64\\x64\\cl.exe",
-			"@C:\\Users\\2101625\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.259.rsp"
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.261.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.2\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\HypercasualGameMode.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.261.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.2\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\HypercasualGameMode.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.261.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.2\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\Tile.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.261.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.2\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\Tile.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.261.rsp"
 		],
 		"directory": "C:\\Program Files\\Epic Games\\UE_5.2\\Engine\\Source"
 	}

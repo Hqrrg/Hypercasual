@@ -7,40 +7,45 @@
 ATile::ATile()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
-	SceneComponent->SetupAttachment(RootComponent);
+	SetRootComponent(SceneComponent);
 
 	TileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TileMeshComponent"));
 	TileMesh->SetupAttachment(SceneComponent);
 
-	ConstructorHelpers::FObjectFinder<UStaticMesh> TileMeshAsset(TEXT("/Engine/BasicShapes/Plane.Plane"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> TileMeshAsset(TEXT("/Engine/BasicShapes/Plane.Plane"));
 
 	if (TileMeshAsset.Succeeded()) 
 	{
 		TileMesh->SetStaticMesh(TileMeshAsset.Object);
-		TileMesh->SetRelativeScale3D(FVector(50, 50, 50));
-		TileMesh->SetRelativeLocation(FVector(2500, 0, 0));
+		TileMesh->SetRelativeScale3D(FVector(50.0f, 50.0f, 50.0f));
+		TileMesh->SetRelativeLocation(FVector(2500.0f, 0.0f, 0.0f));
 	}
 
 	AttachPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("AttachPointComponent"));
 	AttachPoint->SetupAttachment(TileMesh);
-	AttachPoint->SetRelativeLocation(FVector(50, 0 ,0));
-	AttachPoint->SetUsingAbsoluteScale(true);
+	AttachPoint->SetRelativeLocation(FVector(50.0f, 0.0f, 0.0f));
+	AttachPoint->SetRelativeScale3D(FVector(0.2f, 0.2f, 0.2f));
 }
 
 // Called when the game starts or when spawned
 void ATile::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
 void ATile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
 
+FTransform ATile::GetAttachPointTransform() 
+{
+	FTransform AttachPointTransform = AttachPoint->GetComponentTransform();
+	
+	return FTransform(AttachPointTransform.GetRotation(), AttachPointTransform.GetLocation(), FVector(1.0f, 1.0f, 1.0f));
 }
 

@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "Components/SplineComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "InputAction.h"
@@ -29,9 +28,6 @@ class HYPERCASUAL_API ABoulderPawn : public APawn
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera = nullptr;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "", meta = (AllowPrivateAccess = "true"))
-	USplineComponent* BuilderSpline = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext = nullptr;
@@ -59,8 +55,5 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
-	FVector GetWorldLocationFromMousePosition();
-	void ConstructBuilderSpline();
-
 	FTimerHandle BuildTimerHandle;
 };

@@ -17,10 +17,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-public:
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<APawn> GamemodeDefaultPawnClass; 
-
 private:
 	void SpawnNextTile();
 

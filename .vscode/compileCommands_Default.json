@@ -1,5 +1,21 @@
 [
 	{
+		"file": "C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\Barrier.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.261.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.2\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\Barrier.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\.vscode\\compileCommands_Default\\Hypercasual.261.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.2\\Engine\\Source"
+	},
+	{
 		"file": "C:\\Users\\hqrry\\Unreal Projects\\Hypercasual\\Source\\Hypercasual\\BoulderController.cpp",
 		"arguments": [
 			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",

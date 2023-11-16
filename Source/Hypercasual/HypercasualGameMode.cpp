@@ -9,13 +9,13 @@
 AHypercasualGameMode::AHypercasualGameMode()
 {
 	//Set default controller class
-	PlayerControllerClass = ABoulderController::StaticClass();
+	//PlayerControllerClass = ABoulderController::StaticClass();
 	//Set default pawn class
-	DefaultPawnClass = GamemodeDefaultPawnClass;
+	//DefaultPawnClass = ABoulderPawn::StaticClass();
 	//Set default tile transform 
 	NextTileTransform = FTransform(FRotator(-10.0f, 0.0f, 0.0f), FVector(0.0f, 0.0f, 0.0f), FVector(1.0f, 1.0f, 1.0f));
 }
-
+ 
 void AHypercasualGameMode::BeginPlay() 
 {
 	Super::BeginPlay();

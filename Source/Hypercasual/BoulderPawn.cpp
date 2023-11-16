@@ -5,6 +5,8 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "BoulderController.h"
+#include "Kismet/GameplayStatics.h"
+#include "Barrier.h"
 
 // Sets default values
 ABoulderPawn::ABoulderPawn()
@@ -25,7 +27,6 @@ ABoulderPawn::ABoulderPawn()
 		BoulderMesh->SetStaticMesh(BoulderMeshAsset.Object);
 		BoulderMesh->SetWorldScale3D(FVector(2.0f, 2.0f, 2.0f));
 		BoulderMesh->SetSimulatePhysics(true);
-		BoulderMesh->SetAngularDamping(0.5f);
 	}
 
 
@@ -38,9 +39,6 @@ ABoulderPawn::ABoulderPawn()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom);
 	FollowCamera->SetFieldOfView(120.0f);
-
-	BuilderSpline = CreateDefaultSubobject<USplineComponent>(TEXT("BuilderSpline"));
-	BuilderSpline->SetDrawDebug(true);
 }
 
 // Called when the game starts or when spawned
@@ -92,65 +90,34 @@ void ABoulderPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	}
 }
 
+ABarrier* Barrier = nullptr;
+
 void ABoulderPawn::Build(const FInputActionValue &Value)
 {
 	if (Value.Get<bool>())
 	{
 		if (!BuildTimerHandle.IsValid())
 		{
-			GetWorldTimerManager().SetTimer(BuildTimerHandle, this, &ABoulderPawn::ConstructBuilderSpline, 0.1f, true, 0.0f);
+			ABoulderController* BoulderController = Cast<ABoulderController>(Controller);
+			if (BoulderController)
+			{
+				FActorSpawnParameters SpawnParams;
+				FVector SpawnLoc = BoulderController->GetWorldLocationFromMousePosition();
+				FRotator SpawnRot = FRotator(0.0f, 0.0f, 0.0f);
+
+				Barrier = GetWorld()->SpawnActor<ABarrier>(SpawnLoc, SpawnRot, SpawnParams);
+
+				GetWorldTimerManager().SetTimer(BuildTimerHandle, Barrier, &ABarrier::AddNextPoint, 0.1f, true, 0.0f);
+			}
 		}
 	}
 	else
 	{
+		if (Barrier)
+		{
+			Barrier->SetLifeSpan(5.0f);
+		}
 		GetWorldTimerManager().ClearTimer(BuildTimerHandle);
-		BuilderSpline->ClearSplinePoints();
 	}
-}
-
-void ABoulderPawn::ConstructBuilderSpline()
-{
-	/*FSplinePoint SplinePoint;
-	SplinePoint.Position = GetWorldLocationFromMousePosition();
-	SplinePoint.Rotation = FRotator(0.0f, 0.0f, 0.0f);
-	SplinePoint.Scale = FVector(1.0f, 1.0f, 1.0f);*/
-
-	BuilderSpline->AddSplinePoint(FVector(GetWorldLocationFromMousePosition().X, GetWorldLocationFromMousePosition().Y, GetWorldLocationFromMousePosition().Z + 10), ESplineCoordinateSpace::World, true);
-}
-
-FVector ABoulderPawn::GetWorldLocationFromMousePosition() 
-{
-    FVector WorldLocationFromMousePosition;
-
-	APlayerController* PlayerController = Cast<APlayerController>(Controller);
-
-    float MouseX, MouseY;
-    PlayerController->GetMousePosition(MouseX, MouseY);
-
-	const int32 MAX_TRACE_DIST = 5000;
-
-    FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
-    FRotator CameraRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
-    FVector CameraDirection = CameraRotation.Vector().GetSafeNormal();
-
-    FVector TraceStartLoc, TraceEndLoc;
-    PlayerController->DeprojectScreenPositionToWorld(MouseX, MouseY, TraceStartLoc, CameraDirection);
-    TraceEndLoc = TraceStartLoc + MAX_TRACE_DIST * CameraDirection;
-
-    FHitResult* OutHit = new FHitResult();
-
-    GetWorld()->LineTraceSingleByChannel(
-        *OutHit,
-        TraceStartLoc,
-        TraceEndLoc,
-        ECollisionChannel::ECC_Visibility
-    );
-
-    if (OutHit)
-    {
-        WorldLocationFromMousePosition = OutHit->Location;
-    }
-
-    return WorldLocationFromMousePosition;
 }
 

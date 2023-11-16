@@ -8,17 +8,11 @@
 
 AHypercasualGameMode::AHypercasualGameMode()
 {
-	// set default pawn class to our Blueprinted character
-	// static ConstructorHelpers::FClassFinder<APawn> PlayerPawnClass(TEXT("/Game/Hypercasual/Blueprints/BP_BoulderPawn"));
-
-	// if (PlayerPawnClass.Class != NULL)
-	// {
-	// 	DefaultPawnClass = PlayerPawnClass.Class;
-	// }
-
+	//Set default controller class
 	PlayerControllerClass = ABoulderController::StaticClass();
-	DefaultPawnClass = ABoulderPawn::StaticClass();
-	
+	//Set default pawn class
+	DefaultPawnClass = GamemodeDefaultPawnClass;
+	//Set default tile transform 
 	NextTileTransform = FTransform(FRotator(-10.0f, 0.0f, 0.0f), FVector(0.0f, 0.0f, 0.0f), FVector(1.0f, 1.0f, 1.0f));
 }
 

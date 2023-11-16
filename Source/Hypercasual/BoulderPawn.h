@@ -5,8 +5,11 @@
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/SplineComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "InputAction.h"
+#include "InputActionValue.h"
 #include "GameFramework/Pawn.h"
 #include "BoulderPawn.generated.h"
 
@@ -15,9 +18,34 @@ class HYPERCASUAL_API ABoulderPawn : public APawn
 {
 	GENERATED_BODY()
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* SceneComponent = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Appearance", meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* BoulderMesh = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	USpringArmComponent* CameraBoom = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	UCameraComponent* FollowCamera = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "", meta = (AllowPrivateAccess = "true"))
+	USplineComponent* BuilderSpline = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UInputMappingContext* DefaultMappingContext = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* BuildAction = nullptr;
+
 public:
 	// Sets default values for this pawn's properties
 	ABoulderPawn();
+
+protected:
+	//Called for building input
+	void Build(const FInputActionValue& Value);
 
 protected:
 	// Called when the game starts or when spawned
@@ -30,16 +58,9 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(VisibleAnywhere)
-	USceneComponent* SceneComponent = nullptr;
+private:
+	FVector GetWorldLocationFromMousePosition();
+	void ConstructBuilderSpline();
 
-	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* BoulderMesh = nullptr;
-
-	UPROPERTY(VisibleAnywhere)
-	USpringArmComponent* CameraBoom = nullptr;
-
-	UPROPERTY(VisibleAnywhere)
-	UCameraComponent* FollowCamera = nullptr;
-
+	FTimerHandle BuildTimerHandle;
 };

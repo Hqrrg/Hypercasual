@@ -2,6 +2,7 @@
 
 
 #include "BoulderController.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 ABoulderController::ABoulderController() 
 {
@@ -12,4 +13,9 @@ ABoulderController::ABoulderController()
 void ABoulderController::BeginPlay()
 {
     Super::BeginPlay();
+}
+
+void ABoulderController::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime);
 }

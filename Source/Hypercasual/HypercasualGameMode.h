@@ -11,16 +11,20 @@ class AHypercasualGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
-private:
-	void SpawnNextTile();
-
-	FTransform NextTileTransform;
-
+public:
+	AHypercasualGameMode();
+	
 protected:
 	virtual void BeginPlay() override;
 
 public:
-	AHypercasualGameMode();
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<APawn> GamemodeDefaultPawnClass; 
+
+private:
+	void SpawnNextTile();
+
+	FTransform NextTileTransform;
 };
 
 

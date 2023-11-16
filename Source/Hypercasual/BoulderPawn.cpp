@@ -2,6 +2,9 @@
 
 
 #include "BoulderPawn.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "BoulderController.h"
 
 // Sets default values
 ABoulderPawn::ABoulderPawn()
@@ -22,25 +25,37 @@ ABoulderPawn::ABoulderPawn()
 		BoulderMesh->SetStaticMesh(BoulderMeshAsset.Object);
 		BoulderMesh->SetWorldScale3D(FVector(2.0f, 2.0f, 2.0f));
 		BoulderMesh->SetSimulatePhysics(true);
+		BoulderMesh->SetAngularDamping(0.5f);
 	}
 
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(SceneComponent);
 	CameraBoom->TargetArmLength = 1200.0f;
-	CameraBoom->SetRelativeRotation(FRotator(-45.0f, 0.0f, 0.0f));
+	CameraBoom->SetRelativeRotation(FRotator(-75.0f, 0.0f, 0.0f));
 	CameraBoom->bDoCollisionTest = false;
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom);
 	FollowCamera->SetFieldOfView(120.0f);
+
+	BuilderSpline = CreateDefaultSubobject<USplineComponent>(TEXT("BuilderSpline"));
+	BuilderSpline->SetDrawDebug(true);
 }
 
 // Called when the game starts or when spawned
 void ABoulderPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	//Add Input Mapping Context
+	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
+	}
 }
 
 // Called every frame
@@ -69,5 +84,73 @@ void ABoulderPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) 
+	{
+	//Building
+	EnhancedInputComponent->BindAction(BuildAction, ETriggerEvent::Triggered, this, &ABoulderPawn::Build);
+	EnhancedInputComponent->BindAction(BuildAction, ETriggerEvent::Completed, this, &ABoulderPawn::Build);
+	}
+}
+
+void ABoulderPawn::Build(const FInputActionValue &Value)
+{
+	if (Value.Get<bool>())
+	{
+		if (!BuildTimerHandle.IsValid())
+		{
+			GetWorldTimerManager().SetTimer(BuildTimerHandle, this, &ABoulderPawn::ConstructBuilderSpline, 0.1f, true, 0.0f);
+		}
+	}
+	else
+	{
+		GetWorldTimerManager().ClearTimer(BuildTimerHandle);
+		BuilderSpline->ClearSplinePoints();
+	}
+}
+
+void ABoulderPawn::ConstructBuilderSpline()
+{
+	/*FSplinePoint SplinePoint;
+	SplinePoint.Position = GetWorldLocationFromMousePosition();
+	SplinePoint.Rotation = FRotator(0.0f, 0.0f, 0.0f);
+	SplinePoint.Scale = FVector(1.0f, 1.0f, 1.0f);*/
+
+	BuilderSpline->AddSplinePoint(FVector(GetWorldLocationFromMousePosition().X, GetWorldLocationFromMousePosition().Y, GetWorldLocationFromMousePosition().Z + 10), ESplineCoordinateSpace::World, true);
+}
+
+FVector ABoulderPawn::GetWorldLocationFromMousePosition() 
+{
+    FVector WorldLocationFromMousePosition;
+
+	APlayerController* PlayerController = Cast<APlayerController>(Controller);
+
+    float MouseX, MouseY;
+    PlayerController->GetMousePosition(MouseX, MouseY);
+
+	const int32 MAX_TRACE_DIST = 5000;
+
+    FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
+    FRotator CameraRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
+    FVector CameraDirection = CameraRotation.Vector().GetSafeNormal();
+
+    FVector TraceStartLoc, TraceEndLoc;
+    PlayerController->DeprojectScreenPositionToWorld(MouseX, MouseY, TraceStartLoc, CameraDirection);
+    TraceEndLoc = TraceStartLoc + MAX_TRACE_DIST * CameraDirection;
+
+    FHitResult* OutHit = new FHitResult();
+
+    GetWorld()->LineTraceSingleByChannel(
+        *OutHit,
+        TraceStartLoc,
+        TraceEndLoc,
+        ECollisionChannel::ECC_Visibility
+    );
+
+    if (OutHit)
+    {
+        WorldLocationFromMousePosition = OutHit->Location;
+    }
+
+    return WorldLocationFromMousePosition;
 }
 

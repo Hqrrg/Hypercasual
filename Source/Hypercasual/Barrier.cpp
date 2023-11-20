@@ -41,8 +41,13 @@ void ABarrier::AddNextPoint()
 		if (BarrierMesh)
 		{
 			FVector Loc = BoulderController->GetWorldLocationFromMousePosition();
-			BarrierSpline->AddSplinePoint(FVector(Loc.X, Loc.Y, Loc.Z + (BarrierMesh->GetBoundingBox().GetSize().Y / 2)), ESplineCoordinateSpace::World, true);
-			AddMeshComponents();
+			
+			if (Loc != FVector(0.0f, 0.0f, 0.0f))
+			{
+				BarrierSpline->AddSplinePoint(FVector(Loc.X, Loc.Y, Loc.Z + (BarrierMesh->GetBoundingBox().GetSize().Y / 2)), ESplineCoordinateSpace::World, true);
+				AddMeshComponents();
+			}
+
 		}
 	}
 }

@@ -7,6 +7,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/BoxComponent.h"
 #include "InputAction.h"
 #include "InputActionValue.h"
 #include "GameFramework/Pawn.h"
@@ -20,14 +21,14 @@ class HYPERCASUAL_API ABoulderPawn : public APawn
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	USceneComponent* SceneComponent = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Appearance", meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* BoulderMesh = nullptr;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* CameraBoom = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UBoxComponent* TileCullingBox = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext = nullptr;
@@ -38,6 +39,9 @@ class HYPERCASUAL_API ABoulderPawn : public APawn
 public:
 	// Sets default values for this pawn's properties
 	ABoulderPawn();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Appearance", meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* BoulderMesh = nullptr;
 
 protected:
 	//Called for building input
@@ -56,4 +60,10 @@ public:
 
 private:
 	FTimerHandle BuildTimerHandle;
+
+	UFUNCTION()
+	void TileCullingBox_OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex);
+
+	UFUNCTION()
+	void UpdateActorLocation();
 };

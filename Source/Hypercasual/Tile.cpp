@@ -3,6 +3,9 @@
 
 #include "Tile.h"
 
+//Defining custom trace channel
+#define BARRIER_TRACE_CHANNEL ECollisionChannel::ECC_GameTraceChannel1
+
 // Sets default values
 ATile::ATile()
 {
@@ -22,6 +25,7 @@ ATile::ATile()
 		TileMesh->SetStaticMesh(TileMeshAsset.Object);
 		TileMesh->SetRelativeScale3D(FVector(50.0f, 50.0f, 50.0f));
 		TileMesh->SetRelativeLocation(FVector(2500.0f, 0.0f, 0.0f));
+		TileMesh->SetCollisionResponseToChannel(BARRIER_TRACE_CHANNEL, ECollisionResponse::ECR_Block);
 	}
 
 	AttachPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("AttachPointComponent"));

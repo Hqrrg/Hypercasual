@@ -3,8 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Tile.h"
 #include "GameFramework/GameModeBase.h"
 #include "HypercasualGameMode.generated.h"
+
+UENUM(BlueprintType)
+enum TileRarity : uint8
+{
+	RARE = 0,
+	UNCOMMON = 1,
+	COMMON = 2
+};
 
 UCLASS(minimalapi)
 class AHypercasualGameMode : public AGameModeBase
@@ -18,11 +27,16 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	void SpawnNextTile();
-
 	FTransform NextTileTransform;
-};
+	ATile* LastTile = nullptr;
 
+public:
+	UPROPERTY(EditDefaultsOnly)
+	TMap<TSubclassOf<ATile>, TEnumAsByte<TileRarity>> TileFabs;
+
+	void SpawnNextTile();
+	void EndGame();
+};
 
 
 

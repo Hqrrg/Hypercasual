@@ -4,6 +4,9 @@
 #include "Barrier.h"
 #include "Components/SplineMeshComponent.h"
 #include "BoulderController.h"
+#include "BoulderPawn.h"
+#include "Tile.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -36,20 +39,30 @@ void ABarrier::Tick(float DeltaTime)
 void ABarrier::AddNextPoint()
 {
 	ABoulderController* BoulderController = Cast<ABoulderController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-	if (BoulderController)
-	{
-		if (BarrierMesh)
-		{
-			FVector Loc = BoulderController->GetWorldLocationFromMousePosition();
-			
-			if (Loc != FVector(0.0f, 0.0f, 0.0f))
-			{
-				BarrierSpline->AddSplinePoint(FVector(Loc.X, Loc.Y, Loc.Z + (BarrierMesh->GetBoundingBox().GetSize().Y / 2)), ESplineCoordinateSpace::World, true);
-				AddMeshComponents();
-			}
+	FHitResult* OutHit = BoulderController->GetWorldLocationFromMousePosition();
+	UPhysicalMaterial* PhysicalMaterial = OutHit->PhysMaterial.Get();
 
+	if (BarrierMesh && BoulderController && OutHit && PhysicalMaterial)
+	{
+		if (PhysicalMaterial->SurfaceType == EPhysicalSurface::SurfaceType1 && BarrierSpline->GetSplineLength() <= 1000)
+		{
+			FVector Loc = OutHit->Location;
+			BarrierSpline->AddSplinePoint(FVector(Loc.X, Loc.Y, Loc.Z + (BarrierMesh->GetBoundingBox().GetSize().Y / 2)), ESplineCoordinateSpace::World, true);
+			AddMeshComponents();
+			return;
 		}
 	}
+
+	// Force player to stop building spline
+	FViewport* Viewport = GEngine->GameViewport->Viewport;
+
+	FInputKeyEventArgs KeyEventArgs = FInputKeyEventArgs(
+		Viewport,
+		UGameplayStatics::GetPlayerControllerID(BoulderController),
+		FKey(EKeys::LeftMouseButton.GetFName()),
+		EInputEvent::IE_Released);
+
+	Viewport->GetClient()->InputKey(KeyEventArgs);
 }
 
 void ABarrier::AddMeshComponents()

@@ -107,7 +107,7 @@ void ABoulderPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	{
 	//Building
 	EnhancedInputComponent->BindAction(BuildAction, ETriggerEvent::Triggered, this, &ABoulderPawn::Build);
-	EnhancedInputComponent->BindAction(BuildAction, ETriggerEvent::Completed, this, &ABoulderPawn::Build);
+	EnhancedInputComponent->BindAction(BuildAction, ETriggerEvent::Completed, this, &ABoulderPawn::CancelBuild);
 	}
 }
 
@@ -115,15 +115,14 @@ ABarrier* Barrier = nullptr;
 
 void ABoulderPawn::Build(const FInputActionValue &Value)
 {
-	if (Value.Get<bool>())
+	if (!BuildTimerHandle.IsValid())
 	{
-		if (!BuildTimerHandle.IsValid())
+		if (ABoulderController* BoulderController = Cast<ABoulderController>(Controller))
 		{
-			ABoulderController* BoulderController = Cast<ABoulderController>(Controller);
-			if (BoulderController)
+			if (FHitResult* OutHit = BoulderController->GetWorldLocationFromMousePosition())
 			{
 				FActorSpawnParameters SpawnParams;
-				FVector SpawnLoc = BoulderController->GetWorldLocationFromMousePosition();
+				FVector SpawnLoc = OutHit->Location;
 				FRotator SpawnRot = FRotator(0.0f, 0.0f, 0.0f);
 
 				Barrier = GetWorld()->SpawnActor<ABarrier>(SpawnLoc, SpawnRot, SpawnParams);
@@ -132,14 +131,12 @@ void ABoulderPawn::Build(const FInputActionValue &Value)
 			}
 		}
 	}
-	else
-	{
-		if (Barrier)
-		{
-			Barrier->SetLifeSpan(5.0f);
-		}
-		GetWorldTimerManager().ClearTimer(BuildTimerHandle);
-	}
+}
+
+void ABoulderPawn::CancelBuild(const FInputActionValue& Value)
+{
+	if (Barrier) Barrier->SetLifeSpan(5.0f);
+	if (BuildTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(BuildTimerHandle);
 }
 
 void ABoulderPawn::TileCullingBox_OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex)

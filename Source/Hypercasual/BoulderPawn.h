@@ -44,12 +44,14 @@ public:
 	UStaticMeshComponent* BoulderMesh = nullptr;
 
 protected:
-	//Called for building input
-	void Build(const FInputActionValue& Value);
-
-protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	// Called for building input
+	void Build(const FInputActionValue& Value);
+
+	// Called for canceling building input
+	void CancelBuild(const FInputActionValue& Value);
 
 public:	
 	// Called every frame

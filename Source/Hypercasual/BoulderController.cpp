@@ -4,9 +4,6 @@
 #include "BoulderController.h"
 #include "Kismet/KismetSystemLibrary.h"
 
-//Defining custom trace channel
-#define BARRIER_TRACE_CHANNEL ECollisionChannel::ECC_GameTraceChannel1
-
 ABoulderController::ABoulderController() 
 {
     SetShowMouseCursor(true);
@@ -23,10 +20,8 @@ void ABoulderController::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 }
 
-FVector ABoulderController::GetWorldLocationFromMousePosition() 
+FHitResult* ABoulderController::GetWorldLocationFromMousePosition() 
 {
-    FVector WorldLocationFromMousePosition = FVector(0.0f,0.0f,0.0f);
-
     float MouseX, MouseY;
     GetMousePosition(MouseX, MouseY);
 
@@ -40,21 +35,17 @@ FVector ABoulderController::GetWorldLocationFromMousePosition()
     DeprojectScreenPositionToWorld(MouseX, MouseY, TraceStartLoc, CameraDirection);
     TraceEndLoc = TraceStartLoc + MAX_TRACE_DIST * CameraDirection;
 
-    TArray<FHitResult> OutHits;
+    FHitResult* OutHit = new FHitResult();
+    FCollisionQueryParams QueryParams;
+    QueryParams.bReturnPhysicalMaterial = true;
 
-    bool LineTrace = GetWorld()->LineTraceMultiByChannel(
-        OutHits,
+    bool LineTrace = GetWorld()->LineTraceSingleByChannel(
+        *OutHit,
         TraceStartLoc,
         TraceEndLoc,
-        BARRIER_TRACE_CHANNEL
+        ECC_Visibility,
+        QueryParams
     );
 
-    if (LineTrace && FHitResult::GetNumOverlapHits(OutHits) == 0)
-    {
-        for (FHitResult OutHit : OutHits)
-        {
-            WorldLocationFromMousePosition = OutHit.Location;
-        }
-    }
-    return WorldLocationFromMousePosition;
+    return OutHit->bBlockingHit ? OutHit : nullptr;
 }

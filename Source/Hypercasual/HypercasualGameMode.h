@@ -37,6 +37,3 @@ public:
 	void SpawnNextTile();
 	void EndGame();
 };
-
-
-

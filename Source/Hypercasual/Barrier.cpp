@@ -16,7 +16,7 @@ ABarrier::ABarrier()
 	SetRootComponent(BarrierSpline);
 	BarrierSpline->ClearSplinePoints();
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> BarrierMeshAsset(TEXT("/Engine/BasicShapes/Cube.Cube"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> BarrierMeshAsset(TEXT("/Engine/BasicShapes/Plane.Plane"));
 
 	if (BarrierMeshAsset.Succeeded()) BarrierMesh = BarrierMeshAsset.Object;
 }
@@ -63,6 +63,7 @@ void ABarrier::AddMeshComponents()
 			{
 				BarrierMeshComponent->SetStaticMesh(BarrierMesh);
 			}
+
 			BarrierMeshComponent->SetMobility(EComponentMobility::Movable);
 			BarrierMeshComponent->AttachToComponent(BarrierSpline, FAttachmentTransformRules::KeepRelativeTransform);
 			BarrierMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);

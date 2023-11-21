@@ -9,8 +9,6 @@
 
 ABoulderController::ABoulderController() 
 {
-    SetShowMouseCursor(true);
-    SetInputMode(FInputModeGameOnly());
 }
 
 void ABoulderController::BeginPlay()

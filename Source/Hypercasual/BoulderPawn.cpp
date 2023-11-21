@@ -29,7 +29,7 @@ ABoulderPawn::ABoulderPawn()
 		BoulderMesh->SetStaticMesh(BoulderMeshAsset.Object);
 		BoulderMesh->SetWorldScale3D(FVector(2.0f, 2.0f, 2.0f));
 		BoulderMesh->SetSimulatePhysics(true);
-		BoulderMesh->SetAngularDamping(0.25f);
+		BoulderMesh->SetAngularDamping(1.0f);
 	}
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -67,7 +67,7 @@ void ABoulderPawn::BeginPlay()
 	Super::BeginPlay();
 
 	FTimerHandle UpdateActorLocationTimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(UpdateActorLocationTimerHandle, this, &ABoulderPawn::UpdateActorLocation, 0.01f, true, 0.0f);
+	GetWorld()->GetTimerManager().SetTimer(UpdateActorLocationTimerHandle, this, &ABoulderPawn::UpdateActorLocation, 0.001f, true, 0.0f);
 
 	TileCullingBox->OnComponentEndOverlap.AddDynamic(this, &ABoulderPawn::TileCullingBox_OnEndOverlap);
 

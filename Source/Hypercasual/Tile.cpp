@@ -17,15 +17,15 @@ ATile::ATile()
 
 	TileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TileMeshComponent"));
 	TileMesh->SetupAttachment(SceneComponent);
+	TileMesh->SetRelativeScale3D(FVector(50.0f, 50.0f, 50.0f));
+	TileMesh->SetRelativeLocation(FVector(2500.0f, 0.0f, 0.0f));
+	TileMesh->SetCollisionResponseToChannel(BARRIER_TRACE_CHANNEL, ECollisionResponse::ECR_Block);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> TileMeshAsset(TEXT("/Engine/BasicShapes/Plane.Plane"));
 
 	if (TileMeshAsset.Succeeded()) 
 	{
 		TileMesh->SetStaticMesh(TileMeshAsset.Object);
-		TileMesh->SetRelativeScale3D(FVector(50.0f, 50.0f, 50.0f));
-		TileMesh->SetRelativeLocation(FVector(2500.0f, 0.0f, 0.0f));
-		TileMesh->SetCollisionResponseToChannel(BARRIER_TRACE_CHANNEL, ECollisionResponse::ECR_Block);
 	}
 
 	AttachPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("AttachPointComponent"));

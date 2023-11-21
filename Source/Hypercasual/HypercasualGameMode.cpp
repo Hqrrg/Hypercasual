@@ -9,7 +9,7 @@ AHypercasualGameMode::AHypercasualGameMode()
 	NextTileTransform = FTransform(FRotator(-15.0f, 0.0f, 0.0f), FVector(0.0f, 0.0f, 0.0f), FVector(1.0f, 1.0f, 1.0f));
 }
  
-void AHypercasualGameMode::BeginPlay() 
+void AHypercasualGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 	for (int32 i = 0; i < 3; i++)
@@ -18,7 +18,7 @@ void AHypercasualGameMode::BeginPlay()
 	}
 }
 
-void AHypercasualGameMode::SpawnNextTile() 
+void AHypercasualGameMode::SpawnNextTile()
 {
 	if (LastTile) NextTileTransform = LastTile->GetAttachPointTransform();
 

@@ -16,7 +16,7 @@ ABarrier::ABarrier()
 	SetRootComponent(BarrierSpline);
 	BarrierSpline->ClearSplinePoints();
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> BarrierMeshAsset(TEXT("/Engine/BasicShapes/Plane.Plane"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> BarrierMeshAsset(TEXT("/Engine/BasicShapes/Cube.Cube"));
 
 	if (BarrierMeshAsset.Succeeded()) BarrierMesh = BarrierMeshAsset.Object;
 }

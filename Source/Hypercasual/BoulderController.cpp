@@ -9,6 +9,8 @@
 
 ABoulderController::ABoulderController() 
 {
+    SetShowMouseCursor(true);
+    //Can't set FInputMode (Used to be able to!) -> Causes project to have access memory violations - tried in begin play too and causes other issues. Unreal engine is a piece of shit.
 }
 
 void ABoulderController::BeginPlay()

@@ -62,6 +62,7 @@ public:
 
 private:
 	FTimerHandle BuildTimerHandle;
+	int32 MaximumLinearVelocity = 2500;
 
 	UFUNCTION()
 	void TileCullingBox_OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex);

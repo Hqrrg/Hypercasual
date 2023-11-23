@@ -34,8 +34,8 @@ ABoulderPawn::ABoulderPawn()
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(SceneComponent);
-	CameraBoom->TargetArmLength = 1500.0f;
-	CameraBoom->SetRelativeRotation(FRotator(-60.0f, 0.0f, 0.0f));
+	CameraBoom->TargetArmLength = 2000.0f;
+	CameraBoom->SetRelativeRotation(FRotator(-30.0f, 0.0f, 0.0f));
 	CameraBoom->bDoCollisionTest = false;
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
@@ -59,6 +59,14 @@ ABoulderPawn::ABoulderPawn()
 void ABoulderPawn::UpdateActorLocation()
 {
 	SetActorLocation(FVector(BoulderMesh->GetComponentLocation().X + 400.0f, GetActorLocation().Y, BoulderMesh->GetComponentLocation().Z));
+	BoulderMesh->AddForce(FVector(50.0f, 0.0f, 0.0f), FName(), true);
+
+	FVector PhysicsLinearVelocity = BoulderMesh->GetPhysicsLinearVelocity();
+
+	if (PhysicsLinearVelocity.Length() >= MaximumLinearVelocity)
+	{
+		BoulderMesh->SetPhysicsLinearVelocity(PhysicsLinearVelocity * (MaximumLinearVelocity / PhysicsLinearVelocity.Length()), false);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -135,7 +143,10 @@ void ABoulderPawn::Build(const FInputActionValue &Value)
 
 void ABoulderPawn::CancelBuild(const FInputActionValue& Value)
 {
-	if (Barrier) Barrier->SetLifeSpan(5.0f);
+	if (Barrier) {
+		Barrier->SetLifeSpan(5.0f);
+		Barrier = nullptr;
+	}
 	if (BuildTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(BuildTimerHandle);
 }
 

@@ -44,17 +44,18 @@ void ABarrier::Tick(float DeltaTime)
 void ABarrier::AddNextPoint()
 {
 	ABoulderController* BoulderController = Cast<ABoulderController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-	FHitResult* OutHit = BoulderController->GetWorldLocationFromMousePosition();
 
 	if (BarrierMesh && BoulderController)
 	{
+		FHitResult* OutHit = BoulderController->GetWorldLocationFromMousePosition();
+
 		if (OutHit)
 		{
 			if (OutHit->PhysMaterial.Get())
 			{
 				UPhysicalMaterial* PhysicalMaterial = OutHit->PhysMaterial.Get();
 
-				if (PhysicalMaterial->SurfaceType == EPhysicalSurface::SurfaceType1 && BarrierSpline->GetSplineLength() <= 1000)
+				if (PhysicalMaterial->SurfaceType == EPhysicalSurface::SurfaceType1 && BarrierSpline->GetSplineLength() <= MAX_SPLINE_LENGTH)
 				{
 					FVector Loc = OutHit->Location;
 					BarrierSpline->AddSplinePoint(FVector(Loc.X, Loc.Y, Loc.Z + (BarrierMesh->GetBoundingBox().GetSize().Y / 2)), ESplineCoordinateSpace::World, true);

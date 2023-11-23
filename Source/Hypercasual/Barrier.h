@@ -36,5 +36,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void AddNextPoint();
+
+private:
+	const int32 MAX_SPLINE_LENGTH = 1500;
+
 	void AddMeshComponents();
 };

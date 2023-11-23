@@ -6,13 +6,13 @@
 
 AHypercasualGameMode::AHypercasualGameMode()
 {
-	NextTileTransform = FTransform(FRotator(-15.0f, 0.0f, 0.0f), FVector(0.0f, 0.0f, 0.0f), FVector(1.0f, 1.0f, 1.0f));
+	NextTileTransform = FTransform(FRotator(0.0f, 0.0f, 0.0f), FVector(0.0f, 0.0f, 0.0f), FVector(1.0f, 1.0f, 1.0f));
 }
  
 void AHypercasualGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-	for (int32 i = 0; i < 5; i++)
+	for (int32 i = 0; i < 4; i++)
 	{
 		SpawnNextTile();
 	}

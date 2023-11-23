@@ -3,9 +3,6 @@
 
 #include "Tile.h"
 
-//Defining custom trace channel
-#define BARRIER_TRACE_CHANNEL ECollisionChannel::ECC_GameTraceChannel1
-
 // Sets default values
 ATile::ATile()
 {
@@ -15,25 +12,20 @@ ATile::ATile()
 	SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 	SetRootComponent(SceneComponent);
 
-	TileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TileMeshComponent"));
-	TileMesh->SetupAttachment(SceneComponent);
-	TileMesh->SetRelativeScale3D(FVector(50.0f, 50.0f, 50.0f));
-	TileMesh->SetRelativeLocation(FVector(2500.0f, 0.0f, 0.0f));
-	TileMesh->SetCollisionResponseToChannel(BARRIER_TRACE_CHANNEL, ECollisionResponse::ECR_Block);
-
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> TileMeshAsset(TEXT("/Engine/BasicShapes/Plane.Plane"));
-
-	if (TileMeshAsset.Succeeded()) 
-	{
-		TileMesh->SetStaticMesh(TileMeshAsset.Object);
-	}
+	TileMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TileMeshComponent"));
+	TileMeshComponent->SetupAttachment(SceneComponent);
+	TileMeshComponent->SetRelativeLocation(FVector(2500.0f, 0.0f, 0.0f));
 
 	AttachPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("AttachPointComponent"));
-	AttachPoint->SetupAttachment(TileMesh);
-	AttachPoint->SetRelativeLocation(FVector(50.0f, 0.0f, 0.0f));
-	AttachPoint->SetRelativeScale3D(FVector(0.2f, 0.2f, 0.2f));
+	AttachPoint->SetupAttachment(TileMeshComponent);
+	AttachPoint->SetRelativeLocation(FVector(2500.0f, 0.0f, 0.0f));
+	AttachPoint->SetArrowSize(5.0f);
 }
 
+void ATile::OnConstruction(const FTransform& FTransform)
+{
+	if (TileMesh) TileMeshComponent->SetStaticMesh(TileMesh);
+}
 // Called when the game starts or when spawned
 void ATile::BeginPlay()
 {

@@ -25,7 +25,7 @@ FHitResult* ABoulderController::GetWorldLocationFromMousePosition()
     float MouseX, MouseY;
     GetMousePosition(MouseX, MouseY);
 
-	const int32 MAX_TRACE_DIST = 5000;
+	const int32 MAX_TRACE_DIST = 10000;
 
     FVector CameraLocation = PlayerCameraManager->GetCameraLocation();
     FRotator CameraRotation = PlayerCameraManager->GetCameraRotation();

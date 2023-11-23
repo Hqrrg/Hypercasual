@@ -22,6 +22,11 @@ ABarrier::ABarrier()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> BarrierMeshAsset(TEXT("/Engine/BasicShapes/Cube.Cube"));
 
 	if (BarrierMeshAsset.Succeeded()) BarrierMesh = BarrierMeshAsset.Object;
+
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> BarrierMaterialAsset(TEXT("/Game/Hypercasual/Materials/M_Barrier.M_Barrier"));
+	if (BarrierMaterialAsset.Succeeded()) BarrierMaterial = BarrierMaterialAsset.Object;
+	
+	if (BarrierMesh) BarrierMesh->SetMaterial(0, BarrierMaterial);
 }
 
 // Called when the game starts or when spawned
@@ -40,16 +45,23 @@ void ABarrier::AddNextPoint()
 {
 	ABoulderController* BoulderController = Cast<ABoulderController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	FHitResult* OutHit = BoulderController->GetWorldLocationFromMousePosition();
-	UPhysicalMaterial* PhysicalMaterial = OutHit->PhysMaterial.Get();
 
-	if (BarrierMesh && BoulderController && OutHit && PhysicalMaterial)
+	if (BarrierMesh && BoulderController)
 	{
-		if (PhysicalMaterial->SurfaceType == EPhysicalSurface::SurfaceType1 && BarrierSpline->GetSplineLength() <= 1000)
+		if (OutHit)
 		{
-			FVector Loc = OutHit->Location;
-			BarrierSpline->AddSplinePoint(FVector(Loc.X, Loc.Y, Loc.Z + (BarrierMesh->GetBoundingBox().GetSize().Y / 2)), ESplineCoordinateSpace::World, true);
-			AddMeshComponents();
-			return;
+			if (OutHit->PhysMaterial.Get())
+			{
+				UPhysicalMaterial* PhysicalMaterial = OutHit->PhysMaterial.Get();
+
+				if (PhysicalMaterial->SurfaceType == EPhysicalSurface::SurfaceType1 && BarrierSpline->GetSplineLength() <= 1000)
+				{
+					FVector Loc = OutHit->Location;
+					BarrierSpline->AddSplinePoint(FVector(Loc.X, Loc.Y, Loc.Z + (BarrierMesh->GetBoundingBox().GetSize().Y / 2)), ESplineCoordinateSpace::World, true);
+					AddMeshComponents();
+					return;
+				}
+			}
 		}
 	}
 

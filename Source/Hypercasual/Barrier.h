@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/SplineComponent.h"
 #include "Engine/StaticMesh.h"
+#include "Materials/MaterialInterface.h"
 #include "GameFramework/Actor.h"
 #include "Barrier.generated.h"
 
@@ -16,8 +17,11 @@ class HYPERCASUAL_API ABarrier : public AActor
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "", meta = (AllowPrivateAccess = "true"))
 	USplineComponent* BarrierSpline = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Appearance", meta = (AllowPrivateAccess = "true"))
 	UStaticMesh* BarrierMesh = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Appearance", meta = (AllowPrivateAccess = "true"));
+	UMaterialInterface* BarrierMaterial = nullptr;
 	
 public:	
 	// Sets default values for this actor's properties

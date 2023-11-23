@@ -34,13 +34,13 @@ ABoulderPawn::ABoulderPawn()
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(SceneComponent);
-	CameraBoom->TargetArmLength = 1200.0f;
-	CameraBoom->SetRelativeRotation(FRotator(-75.0f, 0.0f, 0.0f));
+	CameraBoom->TargetArmLength = 1500.0f;
+	CameraBoom->SetRelativeRotation(FRotator(-60.0f, 0.0f, 0.0f));
 	CameraBoom->bDoCollisionTest = false;
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom);
-	FollowCamera->SetFieldOfView(120.0f);
+	FollowCamera->SetFieldOfView(100.0f);
 
 
 	TileCullingBox = CreateDefaultSubobject<UBoxComponent>(TEXT("TileCullingBox"));
@@ -145,7 +145,7 @@ void ABoulderPawn::TileCullingBox_OnEndOverlap(UPrimitiveComponent* OverlappedCo
 	{
 		if (UStaticMeshComponent* OtherStaticMeshComponent = Cast<UStaticMeshComponent>(OtherComponent))
 		{
-			if (OtherStaticMeshComponent == OverlappedTile->TileMesh)
+			if (OtherStaticMeshComponent == OverlappedTile->TileMeshComponent)
 			{
 				OverlappedTile->Destroy();
 

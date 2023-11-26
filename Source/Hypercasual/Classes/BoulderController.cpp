@@ -15,9 +15,25 @@ void ABoulderController::BeginPlay()
     Super::BeginPlay();
 }
 
+void ABoulderController::OnPossess(APawn* InPawn)
+{
+    Super::OnPossess(InPawn);
+    
+    FollowCamera->SetFollowTarget(InPawn);
+    FollowCamera->SetOffset(-1500.0f, 0.0f, 1500.0f);
+    FollowCamera->SetPitch(-30.0f);
+    SetViewTarget(FollowCamera);
+    
+}
+
 void ABoulderController::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+}
+
+void ABoulderController::SetCamera(AFollowCamera* NewCamera)
+{
+    FollowCamera = NewCamera;
 }
 
 FHitResult* ABoulderController::GetWorldLocationFromMousePosition() 
@@ -25,9 +41,8 @@ FHitResult* ABoulderController::GetWorldLocationFromMousePosition()
     float MouseX, MouseY;
     GetMousePosition(MouseX, MouseY);
 
-	const int32 MAX_TRACE_DIST = 10000;
-
-    FVector CameraLocation = PlayerCameraManager->GetCameraLocation();
+	const int32 MAX_TRACE_DIST = 5000;
+    
     FRotator CameraRotation = PlayerCameraManager->GetCameraRotation();
     FVector CameraDirection = CameraRotation.Vector().GetSafeNormal();
 

@@ -46,7 +46,7 @@ ABoulderPawn::ABoulderPawn()
 	TileCullingBox = CreateDefaultSubobject<UBoxComponent>(TEXT("TileCullingBox"));
 	TileCullingBox->SetupAttachment(SceneComponent);
 	TileCullingBox->SetRelativeLocation(FVector(-2000.0f, 0.0f, 0.0f));
-	TileCullingBox->SetRelativeScale3D(FVector(1.0f, 100.0f, 50.0f));
+	TileCullingBox->SetBoxExtent(FVector(5.0f, 500.0f, 500.0f));
 
 	/**
 	 * Decrease angular damping as a means of increasing the boulder's speed as the level progresses?
@@ -144,7 +144,6 @@ void ABoulderPawn::Build(const FInputActionValue &Value)
 void ABoulderPawn::CancelBuild(const FInputActionValue& Value)
 {
 	if (Barrier) {
-		Barrier->SetLifeSpan(5.0f);
 		Barrier = nullptr;
 	}
 	if (BuildTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(BuildTimerHandle);

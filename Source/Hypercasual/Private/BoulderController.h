@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FollowCamera.h"
 #include "GameFramework/PlayerController.h"
 #include "BoulderController.generated.h"
 
@@ -19,11 +20,16 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void OnPossess(APawn* InPawn) override;
 
 public:
 	virtual void Tick(float DeltaTime) override;
-	
+
+	void SetCamera(AFollowCamera* NewCamera);
 	FHitResult* GetWorldLocationFromMousePosition();
+
+private:
+	AFollowCamera* FollowCamera = nullptr;
 };
 
 

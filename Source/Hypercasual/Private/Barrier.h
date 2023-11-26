@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Components/SplineComponent.h"
+#include "Components/SplineMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Materials/MaterialInterface.h"
-#include "GameFramework/Actor.h"
+#include "GameFramework/Pawn.h"
 #include "Barrier.generated.h"
 
 UCLASS()
-class HYPERCASUAL_API ABarrier : public AActor
+class HYPERCASUAL_API ABarrier : public APawn
 {
 	GENERATED_BODY()
 
@@ -38,7 +39,10 @@ public:
 	void AddNextPoint();
 
 private:
-	const int32 MAX_SPLINE_LENGTH = 1500;
+	int32 MAX_SPLINE_LENGTH = 1500;
+	TArray<USplineMeshComponent*> BarrierMeshComps;
+	FTimerHandle DecayTimerHandle;
 
 	void AddMeshComponents();
+	void Decay();
 };

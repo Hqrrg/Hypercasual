@@ -3,6 +3,8 @@
 #include "HypercasualGameMode.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Tile.h"
+#include "BoulderController.h"
+#include "FollowCamera.h"
 
 AHypercasualGameMode::AHypercasualGameMode()
 {
@@ -18,13 +20,32 @@ void AHypercasualGameMode::BeginPlay()
 	}
 }
 
+APlayerController* AHypercasualGameMode::SpawnPlayerController(ENetRole InRemoteRole, const FString& Options)
+{
+	APlayerController* PlayerController = Super::SpawnPlayerController(InRemoteRole, Options);
+
+	if (ABoulderController* BoulderController = Cast<ABoulderController>(PlayerController))
+	{
+		UWorld* World = GetWorld();
+		AActor* CameraActor = World->SpawnActor(AFollowCamera::StaticClass(), &FVector::ZeroVector, &FRotator::ZeroRotator);
+	
+		AFollowCamera* FollowCamera = Cast<AFollowCamera>(CameraActor);
+		FollowCamera->SetPlayerController(PlayerController);
+	
+		BoulderController->SetCamera(FollowCamera);	
+	}
+	
+	return PlayerController;
+	
+}
+
 void AHypercasualGameMode::SpawnNextTile()
 {
 	if (LastTile) NextTileTransform = LastTile->GetAttachPointTransform();
 
 	TArray<TSubclassOf<ATile>> TileArray;
 
-	for (const TPair<TSubclassOf<ATile>, TileRarity> &Element : TileFabs)
+	for (const TPair<TSubclassOf<ATile>, TileRarity> Element : TileFabs)
 	{
 		for (int32 i = 0; i < Element.Value + 1; i++)
 		{

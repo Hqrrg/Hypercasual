@@ -21,7 +21,7 @@ void ABoulderController::OnPossess(APawn* InPawn)
     
     FollowCamera->SetFollowTarget(InPawn);
     FollowCamera->SetOffset(-1500.0f, 0.0f, 1500.0f);
-    FollowCamera->SetPitch(-30.0f);
+    FollowCamera->SetPitch(-35.0f);
     SetViewTarget(FollowCamera);
     
 }

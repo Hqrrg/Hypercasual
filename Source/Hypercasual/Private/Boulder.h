@@ -56,7 +56,10 @@ private:
 	FTimerHandle BuildTimerHandle;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Physics", meta = (AllowPrivateAccess = "true"))
-	int32 MaxLinearVelocity = 2500;
+	int32 MaxLinearVelocity = 1500;
+	
+	int32 DistanceTravelled = 0;
+	int32 SpawningLocationX = 0;
 	
 	UFUNCTION()
 	void ShiftWorldOrigin();

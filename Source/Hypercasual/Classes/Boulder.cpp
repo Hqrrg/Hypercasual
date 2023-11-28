@@ -6,8 +6,6 @@
 #include "BoulderController.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "Tile.h"
-#include "HypercasualGameMode.h"
 
 // Sets default values
 ABoulder::ABoulder()
@@ -38,6 +36,8 @@ void ABoulder::BeginPlay()
 {
 	Super::BeginPlay();
 
+	SpawningLocationX = GetActorLocation().X;
+
 	FTimerHandle ShiftWorldOriginHandle;
 	GetWorldTimerManager().SetTimer(ShiftWorldOriginHandle, this, &ABoulder::ShiftWorldOrigin, 5.0f, true);
 
@@ -58,6 +58,7 @@ void ABoulder::BeginPlay()
 void ABoulder::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	DistanceTravelled = GetActorLocation().X - SpawningLocationX;
 }
 
 void ABoulder::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -107,7 +108,7 @@ int32 ABoulder::SetMaxLinearVelocity(int32 Velocity)
 
 void ABoulder::ApplyPhysicsMovement()
 {
-	BoulderMeshComponent->AddForce(FVector(50.0f, 0.0f, 0.0f), FName(), true);
+	BoulderMeshComponent->AddForce(FVector(50.0f, 0.0f, 1.0f), FName(), true);
 	
 	FVector PhysicsLinearVelocity = BoulderMeshComponent->GetPhysicsLinearVelocity();
 
@@ -117,7 +118,6 @@ void ABoulder::ApplyPhysicsMovement()
 	}
 }
 
-
 void ABoulder::ShiftWorldOrigin()
 {
 	FVector ActorLocation = GetActorLocation();
@@ -126,6 +126,7 @@ void ABoulder::ShiftWorldOrigin()
 	if (FMath::Abs(ActorLocation.X) > 10000 || FMath::Abs(ActorLocation.Y) > 10000 || FMath::Abs(ActorLocation.Z) > 10000) 
 	{
 		World->SetNewWorldOrigin(FIntVector(ActorLocation.X, 0.0f, ActorLocation.Z) + World->OriginLocation);
+		SpawningLocationX-=ActorLocation.X;
 	}
 }
 

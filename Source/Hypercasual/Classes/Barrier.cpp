@@ -61,7 +61,7 @@ void ABarrier::AddNextPoint()
 
 					if (!DecayTimerHandle.IsValid())
 					{
-						GetWorldTimerManager().SetTimer(DecayTimerHandle, this, &ABarrier::Decay, 0.5f, true, 0.5f);
+						GetWorldTimerManager().SetTimer(DecayTimerHandle, this, &ABarrier::Decay, 0.5f, true, 1.0f);
 					}
 					return;
 				}
@@ -86,6 +86,8 @@ void ABarrier::AddMeshComponents()
 	// Change method for adding meshes to spline */
 	for (int32 i = 0; i < BarrierSpline->GetNumberOfSplinePoints()-1; i++)
 	{
+		BarrierSpline->GetSplinePointsPosition().Points[i].InterpMode = CIM_CurveAuto;
+		
 		USplineMeshComponent* BarrierMeshComponent = nullptr;
 
 		if (BarrierMeshComps.Num() > i) BarrierMeshComponent = BarrierMeshComps[i];	

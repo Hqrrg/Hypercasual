@@ -15,9 +15,6 @@ UCLASS()
 class HYPERCASUAL_API ABoulder : public APawn
 {
 	GENERATED_BODY()
-
-	UPROPERTY(VisibleAnywhere, Category = "Appearance", meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* BoulderMeshComponent = nullptr;
 	
 	UPROPERTY(EditAnywhere, Category = "Appearance", meta = (AllowPrivateAccess = "true"))
 	UStaticMesh* BoulderMesh = nullptr;
@@ -34,6 +31,9 @@ class HYPERCASUAL_API ABoulder : public APawn
 public:
 	// Sets default values for this actor's properties
 	ABoulder();
+
+	UPROPERTY(VisibleAnywhere, Category = "Appearance", meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* BoulderMeshComponent = nullptr;
 
 protected:
 	// Called when the game starts or when spawned

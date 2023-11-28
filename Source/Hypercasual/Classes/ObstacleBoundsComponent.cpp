@@ -2,8 +2,8 @@
 
 
 #include "ObstacleBoundsComponent.h"
-#include "BoulderPawn.h"
 #include "HypercasualGameMode.h"
+#include "Boulder.h"
 
 // Sets default values for this component's properties
 UObstacleBoundsComponent::UObstacleBoundsComponent()
@@ -31,9 +31,9 @@ void UObstacleBoundsComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 
 void UObstacleBoundsComponent::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
 {
-	if (ABoulderPawn* BoulderPawn = Cast<ABoulderPawn>(OtherActor))
+	if (ABoulder* Boulder = Cast<ABoulder>(OtherActor))
 	{
-		if (OtherComp == BoulderPawn->BoulderMesh)
+		if (OtherComp == Boulder->BoulderMeshComponent)
 		{
 			if (AHypercasualGameMode* HypercasualGameMode = Cast<AHypercasualGameMode>(GetWorld()->GetAuthGameMode()))
 			{

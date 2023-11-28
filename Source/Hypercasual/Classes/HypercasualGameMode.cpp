@@ -14,6 +14,7 @@ AHypercasualGameMode::AHypercasualGameMode()
 void AHypercasualGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+
 	for (int32 i = 0; i < 4; i++)
 	{
 		SpawnNextTile();

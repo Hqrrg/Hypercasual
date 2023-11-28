@@ -20,7 +20,7 @@ AFollowCamera::AFollowCamera()
 
 	CullingBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CullingBox"));
 	CullingBox->SetBoxExtent(FVector(100.0f, 1000.0f, 1000.0f));
-	CullingBox->SetRelativeLocation(FVector(-2000.0f, 0.0f, 0.0f));
+	CullingBox->SetRelativeLocation(FVector(-2500.0f, 0.0f, 0.0f));
 	CullingBox->SetupAttachment(RootComponent);
 }
 
@@ -40,10 +40,10 @@ void AFollowCamera::Tick(float DeltaTime)
 	if (FollowTarget)
 	{
 		FVector TargetLocation = FollowTarget->GetActorLocation();
-		SetActorLocation(FVector(TargetLocation.X, 0.0f, TargetLocation.Z));
+		FVector NewActorLocation = FVector(TargetLocation.X, FMath::Clamp(TargetLocation.Y, -1000.0 , 1000.0), TargetLocation.Z);
 		
-		FVector CameraTargetLocation = TargetLocation + Offset;
-		CameraComponent->SetWorldLocation(FVector(CameraTargetLocation.X, 0.0f, CameraTargetLocation.Z));
+		SetActorLocation(NewActorLocation);
+		CameraComponent->SetWorldLocation(NewActorLocation + Offset);
 	}
 }
 

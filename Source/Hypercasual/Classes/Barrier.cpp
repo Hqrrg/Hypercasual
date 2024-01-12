@@ -25,6 +25,8 @@ ABarrier::ABarrier()
 	if (BarrierMaterialAsset.Succeeded()) BarrierMaterial = BarrierMaterialAsset.Object;
 	
 	if (BarrierMesh) BarrierMesh->SetMaterial(0, BarrierMaterial);
+
+	LastPointPosition = FVector::ZeroVector;
 }
 
 // Called when the game starts or when spawned
@@ -56,12 +58,21 @@ void ABarrier::AddNextPoint()
 				if (PhysicalMaterial->SurfaceType == EPhysicalSurface::SurfaceType1 && BarrierSpline->GetSplineLength() <= MAX_SPLINE_LENGTH)
 				{
 					FVector Loc = OutHit->Location;
-					BarrierSpline->AddSplinePoint(FVector(Loc.X, Loc.Y, Loc.Z + (BarrierMesh->GetBoundingBox().GetSize().Y / 2)), ESplineCoordinateSpace::World, true);
-					AddMeshComponents();
+
+					if ((Loc-LastPointPosition).Length() >= 200.0f)
+					{
+						FVector PointPosition = FVector(Loc.X, Loc.Y, Loc.Z + (BarrierMesh->GetBoundingBox().GetSize().Y / 2));
+ 
+						//Recursively call this function or another within this function to re-calculate spline points to be evenly spaced out.
+						BarrierSpline->AddSplinePoint(PointPosition, ESplineCoordinateSpace::World, true);
+						AddMeshComponents();
+						
+						LastPointPosition = PointPosition;
+					}
 
 					if (!DecayTimerHandle.IsValid())
 					{
-						GetWorldTimerManager().SetTimer(DecayTimerHandle, this, &ABarrier::Decay, 0.5f, true, 1.0f);
+						GetWorldTimerManager().SetTimer(DecayTimerHandle, this, &ABarrier::Decay, 0.2f, true, 0.2f);
 					}
 					return;
 				}
@@ -126,17 +137,25 @@ void ABarrier::Decay()
 {
 	if (BarrierMeshComps.Num() != 0)
 	{
-		USplineMeshComponent* SplineMeshComponent = BarrierMeshComps[0];
-		BarrierMeshComps.Remove(SplineMeshComponent);
-
-		SplineMeshComponent->DestroyComponent();
+		USplineMeshComponent* SplineMeshComponent = nullptr;
 		
-		SplineMeshComponent = nullptr;
-	}
-	else
-	{
-		GetWorldTimerManager().ClearTimer(DecayTimerHandle);
-		Destroy();
+		for (int32 i = 0; i < BarrierMeshComps.Num(); i++)
+		{
+			if (USplineMeshComponent* CurrentBarrierMesh = BarrierMeshComps[i]; CurrentBarrierMesh->IsRegistered() && !CurrentBarrierMesh->IsBeingDestroyed())
+			{
+				SplineMeshComponent = CurrentBarrierMesh;
+				break;
+			}
+		}
+
+		if (SplineMeshComponent)
+		{
+			SplineMeshComponent->DestroyComponent();
+		}
+		else
+		{
+			GetWorldTimerManager().ClearTimer(DecayTimerHandle);
+			Destroy();
+		}
 	}
 }
-

@@ -8,14 +8,20 @@
 
 AHypercasualGameMode::AHypercasualGameMode()
 {
-	NextTileTransform = FTransform(FRotator(0.0f, 0.0f, 0.0f), FVector(0.0f, 0.0f, 0.0f), FVector(1.0f, 1.0f, 1.0f));
+	NextTileTransform  = FTransform(FRotator(0.0f, 0.0f, 0.0f), FVector(0.0f, 0.0f, 0.0f), FVector(1.0f, 1.0f, 1.0f));
 }
  
 void AHypercasualGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
-	for (int32 i = 0; i < 4; i++)
+	if (SpawningTile)
+	{
+		ATile* SpawningTileInstance = GetWorld()->SpawnActor<ATile>(SpawningTile->GetAuthoritativeClass(), NextTileTransform);
+		NextTileTransform = SpawningTileInstance->GetAttachPointTransform();
+	}
+
+	for (int32 i = 0; i < 5; i++)
 	{
 		SpawnNextTile();
 	}
@@ -27,8 +33,7 @@ APlayerController* AHypercasualGameMode::SpawnPlayerController(ENetRole InRemote
 
 	if (ABoulderController* BoulderController = Cast<ABoulderController>(PlayerController))
 	{
-		UWorld* World = GetWorld();
-		AActor* CameraActor = World->SpawnActor(AFollowCamera::StaticClass(), &FVector::ZeroVector, &FRotator::ZeroRotator);
+		AActor* CameraActor = GetWorld()->SpawnActor(AFollowCamera::StaticClass(), &FVector::ZeroVector, &FRotator::ZeroRotator);
 	
 		AFollowCamera* FollowCamera = Cast<AFollowCamera>(CameraActor);
 		FollowCamera->SetPlayerController(PlayerController);

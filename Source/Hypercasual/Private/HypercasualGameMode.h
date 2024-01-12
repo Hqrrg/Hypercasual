@@ -33,6 +33,10 @@ private:
 	ATile* LastTile = nullptr;
 
 public:
+
+	UPROPERTY(EditDefaultsOnly, Category = "Tiles", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<ATile> SpawningTile = nullptr;
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Tiles", meta = (AllowPrivateAccess = "true"))
 	TMap<TSubclassOf<ATile>, TEnumAsByte<TileRarity>> TileFabs;
 

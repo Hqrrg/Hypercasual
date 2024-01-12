@@ -22,6 +22,12 @@ class HYPERCASUAL_API ABoulder : public APawn
 	UPROPERTY(EditAnywhere, Category = "Appearance", meta = (AllowPrivateAccess = "true"))
 	UMaterialInterface* BoulderMaterial = nullptr;
 
+	UPROPERTY(EditAnywhere, Category = "Appearance", meta = (AllowPrivateAccess = "true"))
+	UMaterialInterface* BoulderImmuneBaseMaterial = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "Appearance", meta = (AllowPrivateAccess = "true"))
+	UMaterialInterface* BoulderImmuneOverlayMaterial = nullptr;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext = nullptr;
 
@@ -48,22 +54,41 @@ public:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 	int32 SetMaxLinearVelocity(int32 Velocity);
+	int32 GetRemainingLives();
+	void DecrementLives();
+	void EndGame();
 
 private:
 	void Build(const FInputActionValue& Value);
 	void CancelBuild(const FInputActionValue& Value);
 
 	FTimerHandle BuildTimerHandle;
+	FTimerHandle PhysicsMovementHandle;
+	FTimerHandle ResetGhostedTimerHandle;
+	FTimerHandle FlickerTimerHandle;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Physics", meta = (AllowPrivateAccess = "true"))
-	int32 MaxLinearVelocity = 1500;
+	int32 MaxLinearVelocity = 2500;
 	
 	int32 DistanceTravelled = 0;
 	int32 SpawningLocationX = 0;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Defaults", meta = (AllowPrivateAccess = "true"))
+	int32 Lives = 3;
+	
+	int32 RemainingLives = Lives;
+
+	bool Ghosted = false;
 	
 	UFUNCTION()
 	void ShiftWorldOrigin();
 
 	UFUNCTION()
 	void ApplyPhysicsMovement();
+
+	UFUNCTION()
+	void Ghost();
+
+	UFUNCTION()
+	void ToggleGhostMaterialOverlay();
 };

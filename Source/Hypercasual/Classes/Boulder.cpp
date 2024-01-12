@@ -6,6 +6,8 @@
 #include "BoulderController.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "HypercasualGameMode.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ABoulder::ABoulder()
@@ -15,6 +17,7 @@ ABoulder::ABoulder()
 
 	BoulderMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BoulderMesh"));
 	BoulderMeshComponent->SetSimulatePhysics(true);
+	BoulderMeshComponent->BodyInstance.bNotifyRigidBodyCollision = true;
 	SetRootComponent(BoulderMeshComponent);
 }
 
@@ -40,8 +43,7 @@ void ABoulder::BeginPlay()
 
 	FTimerHandle ShiftWorldOriginHandle;
 	GetWorldTimerManager().SetTimer(ShiftWorldOriginHandle, this, &ABoulder::ShiftWorldOrigin, 5.0f, true);
-
-	FTimerHandle PhysicsMovementHandle;
+	
 	GetWorldTimerManager().SetTimer(PhysicsMovementHandle, this, &ABoulder::ApplyPhysicsMovement, 0.001f, true);
 
 	//Add Input Mapping Context
@@ -89,7 +91,7 @@ void ABoulder::Build(const FInputActionValue &Value)
 
 				Barrier = GetWorld()->SpawnActor<ABarrier>(SpawnLoc, SpawnRot, SpawnParams);
 
-				GetWorldTimerManager().SetTimer(BuildTimerHandle, Barrier, &ABarrier::AddNextPoint, 0.1f, true, 0.0f);
+				GetWorldTimerManager().SetTimer(BuildTimerHandle, Barrier, &ABarrier::AddNextPoint, 0.001f, true, 0.0f);
 			}
 		}
 	}
@@ -106,16 +108,79 @@ int32 ABoulder::SetMaxLinearVelocity(int32 Velocity)
 	return MaxLinearVelocity = Velocity;
 }
 
+int32 ABoulder::GetRemainingLives()
+{
+	return RemainingLives;
+}
+
+void ABoulder::DecrementLives()
+{
+	if (!Ghosted)
+	{
+		RemainingLives--;
+
+		if (AHypercasualGameMode* HypercasualGameMode = Cast<AHypercasualGameMode>(GetWorld()->GetAuthGameMode()))
+		{
+			if (RemainingLives > 0)
+			{
+				Ghost();
+				return;
+			}
+
+			EndGame();
+			HypercasualGameMode->EndGame();
+		}
+	}
+}
+
 void ABoulder::ApplyPhysicsMovement()
 {
-	BoulderMeshComponent->AddForce(FVector(50.0f, 0.0f, 1.0f), FName(), true);
+	FVector MeshCompVel = BoulderMeshComponent->GetComponentVelocity() + FVector(1.0f, 0.0f, 0.0f);
+	
+	if (MeshCompVel.Normalize())
+	{
+		MeshCompVel = FVector(1.0f, MeshCompVel.Y, MeshCompVel.Z*-1);
+		BoulderMeshComponent->AddForce(MeshCompVel * 50.0f, FName(), true);
+	}
 	
 	FVector PhysicsLinearVelocity = BoulderMeshComponent->GetPhysicsLinearVelocity();
+	BoulderMeshComponent->SetPhysicsLinearVelocity(PhysicsLinearVelocity.GetClampedToMaxSize(MaxLinearVelocity));
+}
 
-	if (PhysicsLinearVelocity.Length() > MaxLinearVelocity)
+void ABoulder::Ghost()
+{
+	Ghosted = !Ghosted;
+	
+	if (Ghosted)
 	{
-		BoulderMeshComponent->SetPhysicsLinearVelocity(PhysicsLinearVelocity * (MaxLinearVelocity / PhysicsLinearVelocity.Length()), false);
+		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.5f);
+		
+		BoulderMeshComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
+		GetWorldTimerManager().SetTimer(ResetGhostedTimerHandle, this, &ABoulder::Ghost, 1.5f);
+		GetWorldTimerManager().SetTimer(FlickerTimerHandle, this, &ABoulder::ToggleGhostMaterialOverlay, 0.1f, true, 0.0f);
+		
 	}
+	else
+	{
+		GetWorldTimerManager().ClearTimer(FlickerTimerHandle);
+		GetWorldTimerManager().ClearTimer(ResetGhostedTimerHandle);
+		
+		BoulderMeshComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Block);
+		BoulderMeshComponent->SetVisibility(true);
+		
+		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
+	}
+}
+
+void ABoulder::ToggleGhostMaterialOverlay()
+{
+	BoulderMeshComponent->ToggleVisibility();
+}
+
+void ABoulder::EndGame()
+{
+	GetWorldTimerManager().ClearTimer(PhysicsMovementHandle);
+	BoulderMeshComponent->SetSimulatePhysics(false);
 }
 
 void ABoulder::ShiftWorldOrigin()

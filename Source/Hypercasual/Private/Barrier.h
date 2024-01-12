@@ -42,6 +42,7 @@ private:
 	int32 MAX_SPLINE_LENGTH = 1500;
 	TArray<USplineMeshComponent*> BarrierMeshComps;
 	FTimerHandle DecayTimerHandle;
+	FVector LastPointPosition;
 
 	void AddMeshComponents();
 	void Decay();

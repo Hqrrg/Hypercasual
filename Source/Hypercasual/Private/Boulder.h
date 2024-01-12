@@ -22,11 +22,9 @@ class HYPERCASUAL_API ABoulder : public APawn
 	UPROPERTY(EditAnywhere, Category = "Appearance", meta = (AllowPrivateAccess = "true"))
 	UMaterialInterface* BoulderMaterial = nullptr;
 
-	UPROPERTY(EditAnywhere, Category = "Appearance", meta = (AllowPrivateAccess = "true"))
-	UMaterialInterface* BoulderImmuneBaseMaterial = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Appearance", meta = (AllowPrivateAccess = "true"))
-	UMaterialInterface* BoulderImmuneOverlayMaterial = nullptr;
+	UMaterialInterface* BoulderGhostMaterial = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext = nullptr;
@@ -90,5 +88,5 @@ private:
 	void Ghost();
 
 	UFUNCTION()
-	void ToggleGhostMaterialOverlay();
+	void ToggleGhostMaterial();
 };

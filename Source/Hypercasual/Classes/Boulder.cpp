@@ -147,34 +147,52 @@ void ABoulder::ApplyPhysicsMovement()
 	BoulderMeshComponent->SetPhysicsLinearVelocity(PhysicsLinearVelocity.GetClampedToMaxSize(MaxLinearVelocity));
 }
 
+bool GhostMaterialApplied;
+
 void ABoulder::Ghost()
 {
 	Ghosted = !Ghosted;
+	GhostMaterialApplied = false;
 	
 	if (Ghosted)
 	{
-		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.5f);
+		//UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.5f);
 		
 		BoulderMeshComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
-		GetWorldTimerManager().SetTimer(ResetGhostedTimerHandle, this, &ABoulder::Ghost, 1.5f);
-		GetWorldTimerManager().SetTimer(FlickerTimerHandle, this, &ABoulder::ToggleGhostMaterialOverlay, 0.1f, true, 0.0f);
+
+		// Recursive Function Call After Timer Expiration
+		GetWorldTimerManager().SetTimer(ResetGhostedTimerHandle, this, &ABoulder::Ghost, 3.0f);
+		//GetWorldTimerManager().SetTimer(FlickerTimerHandle, this, &ABoulder::ToggleGhostMaterial, 0.5f, true, 0.0f);
 		
 	}
 	else
 	{
-		GetWorldTimerManager().ClearTimer(FlickerTimerHandle);
+		//GetWorldTimerManager().ClearTimer(FlickerTimerHandle);
 		GetWorldTimerManager().ClearTimer(ResetGhostedTimerHandle);
 		
-		BoulderMeshComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Block);
-		BoulderMeshComponent->SetVisibility(true);
+		BoulderMeshComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Overlap);
+		//BoulderMeshComponent->SetMaterial(0, BoulderMaterial);
 		
-		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
+		//UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
 	}
 }
 
-void ABoulder::ToggleGhostMaterialOverlay()
+void ABoulder::ToggleGhostMaterial()
 {
-	BoulderMeshComponent->ToggleVisibility();
+	//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, FString("Hello"));
+	if (BoulderGhostMaterial)
+	{
+		if (!GhostMaterialApplied)
+		{
+			BoulderMesh->SetMaterial(0, BoulderGhostMaterial);
+		}
+		else
+		{
+			BoulderMesh->SetMaterial(0, BoulderMaterial);
+		}
+		GhostMaterialApplied = !GhostMaterialApplied;
+
+	}
 }
 
 void ABoulder::EndGame()

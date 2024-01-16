@@ -44,7 +44,7 @@ void ABoulder::BeginPlay()
 	FTimerHandle ShiftWorldOriginHandle;
 	GetWorldTimerManager().SetTimer(ShiftWorldOriginHandle, this, &ABoulder::ShiftWorldOrigin, 5.0f, true);
 	
-	GetWorldTimerManager().SetTimer(PhysicsMovementHandle, this, &ABoulder::ApplyPhysicsMovement, 0.001f, true);
+	GetWorldTimerManager().SetTimer(PhysicsMovementHandle, this, &ABoulder::ApplyPhysicsMovement, 0.01f, true);
 
 	//Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
@@ -103,11 +103,6 @@ void ABoulder::CancelBuild(const FInputActionValue& Value)
 	if (BuildTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(BuildTimerHandle);
 }
 
-int32 ABoulder::SetMaxLinearVelocity(int32 Velocity)
-{
-	return MaxLinearVelocity = Velocity;
-}
-
 int32 ABoulder::GetRemainingLives()
 {
 	return RemainingLives;
@@ -135,46 +130,61 @@ void ABoulder::DecrementLives()
 
 void ABoulder::ApplyPhysicsMovement()
 {
-	FVector MeshCompVel = BoulderMeshComponent->GetComponentVelocity() + FVector(1.0f, 0.0f, 0.0f);
-	
-	if (MeshCompVel.Normalize())
-	{
-		MeshCompVel = FVector(1.0f, MeshCompVel.Y, MeshCompVel.Z*-1);
-		BoulderMeshComponent->AddForce(MeshCompVel * 50.0f, FName(), true);
-	}
-	
-	FVector PhysicsLinearVelocity = BoulderMeshComponent->GetPhysicsLinearVelocity();
-	BoulderMeshComponent->SetPhysicsLinearVelocity(PhysicsLinearVelocity.GetClampedToMaxSize(MaxLinearVelocity));
+	const FVector ForceDirection = FVector(1.0f, 0.0f, 0.0f);
+	const float Velocity = GetVelocity().Length();
+	const float ForceScaleFactor = FMath::GetMappedRangeValueClamped(FVector2D(VelocityLimit-5, VelocityLimit), FVector2D(VelocityLimit, 0), Velocity);
+
+	BoulderMeshComponent->AddForce(ForceDirection * ForceScaleFactor, NAME_None, true);
+
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, FString::Printf(TEXT("Velocity: %f"), Velocity));
 }
+
+bool GhostMaterialApplied;
 
 void ABoulder::Ghost()
 {
 	Ghosted = !Ghosted;
+	GhostMaterialApplied = false;
 	
 	if (Ghosted)
 	{
-		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.5f);
+		//UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.5f);
 		
 		BoulderMeshComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
-		GetWorldTimerManager().SetTimer(ResetGhostedTimerHandle, this, &ABoulder::Ghost, 1.5f);
-		GetWorldTimerManager().SetTimer(FlickerTimerHandle, this, &ABoulder::ToggleGhostMaterialOverlay, 0.1f, true, 0.0f);
+
+		// Recursive Function Call After Timer Expiration
+		GetWorldTimerManager().SetTimer(ResetGhostedTimerHandle, this, &ABoulder::Ghost, 3.0f);
+		//GetWorldTimerManager().SetTimer(FlickerTimerHandle, this, &ABoulder::ToggleGhostMaterial, 0.5f, true, 0.0f);
 		
 	}
 	else
 	{
-		GetWorldTimerManager().ClearTimer(FlickerTimerHandle);
+		//GetWorldTimerManager().ClearTimer(FlickerTimerHandle);
 		GetWorldTimerManager().ClearTimer(ResetGhostedTimerHandle);
 		
-		BoulderMeshComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Block);
-		BoulderMeshComponent->SetVisibility(true);
+		BoulderMeshComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Overlap);
+		//BoulderMeshComponent->SetMaterial(0, BoulderMaterial);
 		
-		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
+		//UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
 	}
 }
 
-void ABoulder::ToggleGhostMaterialOverlay()
+void ABoulder::ToggleGhostMaterial()
 {
-	BoulderMeshComponent->ToggleVisibility();
+	//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, FString("Hello"));
+	if (BoulderGhostMaterial)
+	{
+		if (!GhostMaterialApplied)
+		{
+			BoulderMesh->SetMaterial(0, BoulderGhostMaterial);
+		}
+		else
+		{
+			BoulderMesh->SetMaterial(0, BoulderMaterial);
+		}
+		GhostMaterialApplied = !GhostMaterialApplied;
+
+	}
 }
 
 void ABoulder::EndGame()
@@ -185,12 +195,12 @@ void ABoulder::EndGame()
 
 void ABoulder::ShiftWorldOrigin()
 {
-	FVector ActorLocation = GetActorLocation();
+	const FVector ActorLocation = GetActorLocation();
 	UWorld* World = GetWorld();
 
-	if (FMath::Abs(ActorLocation.X) > 10000 || FMath::Abs(ActorLocation.Y) > 10000 || FMath::Abs(ActorLocation.Z) > 10000) 
+	if (FMath::Abs(ActorLocation.X) > 10000) 
 	{
-		World->SetNewWorldOrigin(FIntVector(ActorLocation.X, 0.0f, ActorLocation.Z) + World->OriginLocation);
+		World->SetNewWorldOrigin(FIntVector(ActorLocation.X, 0.0f, 0.0f) + World->OriginLocation);
 		SpawningLocationX-=ActorLocation.X;
 	}
 }

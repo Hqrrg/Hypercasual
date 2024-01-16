@@ -22,11 +22,9 @@ class HYPERCASUAL_API ABoulder : public APawn
 	UPROPERTY(EditAnywhere, Category = "Appearance", meta = (AllowPrivateAccess = "true"))
 	UMaterialInterface* BoulderMaterial = nullptr;
 
-	UPROPERTY(EditAnywhere, Category = "Appearance", meta = (AllowPrivateAccess = "true"))
-	UMaterialInterface* BoulderImmuneBaseMaterial = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Appearance", meta = (AllowPrivateAccess = "true"))
-	UMaterialInterface* BoulderImmuneOverlayMaterial = nullptr;
+	UMaterialInterface* BoulderGhostMaterial = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext = nullptr;
@@ -52,8 +50,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-
-	int32 SetMaxLinearVelocity(int32 Velocity);
+	
 	int32 GetRemainingLives();
 	void DecrementLives();
 	void EndGame();
@@ -68,7 +65,7 @@ private:
 	FTimerHandle FlickerTimerHandle;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Physics", meta = (AllowPrivateAccess = "true"))
-	int32 MaxLinearVelocity = 2500;
+	float VelocityLimit = 2000.0f;
 	
 	int32 DistanceTravelled = 0;
 	int32 SpawningLocationX = 0;
@@ -90,5 +87,5 @@ private:
 	void Ghost();
 
 	UFUNCTION()
-	void ToggleGhostMaterialOverlay();
+	void ToggleGhostMaterial();
 };

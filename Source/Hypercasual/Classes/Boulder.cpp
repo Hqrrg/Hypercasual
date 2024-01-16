@@ -7,7 +7,6 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "HypercasualGameMode.h"
-#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ABoulder::ABoulder()
@@ -29,7 +28,8 @@ void ABoulder::OnConstruction(const FTransform& Transform)
 		
 		if (BoulderMaterial)
 		{
-			BoulderMesh->SetMaterial(0, BoulderMaterial);
+			DynamicBoulderMaterial = UMaterialInstanceDynamic::Create(BoulderMaterial, this);
+			BoulderMesh->SetMaterial(0, DynamicBoulderMaterial);
 		}
 	}
 }
@@ -135,16 +135,11 @@ void ABoulder::ApplyPhysicsMovement()
 	const float ForceScaleFactor = FMath::GetMappedRangeValueClamped(FVector2D(VelocityLimit-5, VelocityLimit), FVector2D(VelocityLimit, 0), Velocity);
 
 	BoulderMeshComponent->AddForce(ForceDirection * ForceScaleFactor, NAME_None, true);
-
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, FString::Printf(TEXT("Velocity: %f"), Velocity));
 }
-
-bool GhostMaterialApplied;
 
 void ABoulder::Ghost()
 {
 	Ghosted = !Ghosted;
-	GhostMaterialApplied = false;
 	
 	if (Ghosted)
 	{
@@ -154,37 +149,49 @@ void ABoulder::Ghost()
 
 		// Recursive Function Call After Timer Expiration
 		GetWorldTimerManager().SetTimer(ResetGhostedTimerHandle, this, &ABoulder::Ghost, 3.0f);
-		//GetWorldTimerManager().SetTimer(FlickerTimerHandle, this, &ABoulder::ToggleGhostMaterial, 0.5f, true, 0.0f);
+		GetWorldTimerManager().SetTimer(BlinkTimerHandle, this, &ABoulder::Blink, 0.5f, true, 0.0f);
 		
 	}
 	else
 	{
-		//GetWorldTimerManager().ClearTimer(FlickerTimerHandle);
 		GetWorldTimerManager().ClearTimer(ResetGhostedTimerHandle);
+		GetWorldTimerManager().ClearTimer(BlinkTimerHandle);
 		
 		BoulderMeshComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Overlap);
-		//BoulderMeshComponent->SetMaterial(0, BoulderMaterial);
+		DynamicBoulderMaterial->SetScalarParameterValue("Opacity", 1.0f);
+		DynamicBoulderMaterial->SetVectorParameterValue("Colour", FLinearColor(1.0f, 1.0f, 1.0f, 1.0f));
 		
 		//UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
 	}
 }
 
-void ABoulder::ToggleGhostMaterial()
+void ABoulder::Blink()
 {
-	//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, FString("Hello"));
-	if (BoulderGhostMaterial)
-	{
-		if (!GhostMaterialApplied)
-		{
-			BoulderMesh->SetMaterial(0, BoulderGhostMaterial);
-		}
-		else
-		{
-			BoulderMesh->SetMaterial(0, BoulderMaterial);
-		}
-		GhostMaterialApplied = !GhostMaterialApplied;
+	FLinearColor Colour;
+	float Opacity;
+	
+	TArray<FMaterialParameterInfo> ScalarInfo;
+	TArray<FMaterialParameterInfo> VectorInfo;
+	TArray<FGuid> Guids;
+	
+	DynamicBoulderMaterial->GetAllVectorParameterInfo(VectorInfo, Guids);
+	DynamicBoulderMaterial->GetVectorParameterValue(VectorInfo[0], Colour);
+	
+	DynamicBoulderMaterial->GetAllScalarParameterInfo(ScalarInfo, Guids);
+	DynamicBoulderMaterial->GetScalarParameterValue(ScalarInfo[0], Opacity);
 
+	switch(Blinked)
+	{
+	case true:
+		DynamicBoulderMaterial->SetVectorParameterValueByInfo(VectorInfo[0], FLinearColor(1.0f, 1.0f, 1.0f, 1.0f));
+		break;
+		
+	case false:
+		DynamicBoulderMaterial->SetVectorParameterValueByInfo(VectorInfo[0], FLinearColor(1.0f, 0.25f, 0.25f, 1.0f));
+		break;
 	}
+	
+	Blinked = !Blinked;
 }
 
 void ABoulder::EndGame()

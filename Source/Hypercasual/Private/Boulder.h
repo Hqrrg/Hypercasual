@@ -22,10 +22,6 @@ class HYPERCASUAL_API ABoulder : public APawn
 	UPROPERTY(EditAnywhere, Category = "Appearance", meta = (AllowPrivateAccess = "true"))
 	UMaterialInterface* BoulderMaterial = nullptr;
 
-
-	UPROPERTY(EditAnywhere, Category = "Appearance", meta = (AllowPrivateAccess = "true"))
-	UMaterialInterface* BoulderGhostMaterial = nullptr;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext = nullptr;
 
@@ -59,10 +55,12 @@ private:
 	void Build(const FInputActionValue& Value);
 	void CancelBuild(const FInputActionValue& Value);
 
+	UMaterialInstanceDynamic* DynamicBoulderMaterial;
+
 	FTimerHandle BuildTimerHandle;
 	FTimerHandle PhysicsMovementHandle;
 	FTimerHandle ResetGhostedTimerHandle;
-	FTimerHandle FlickerTimerHandle;
+	FTimerHandle BlinkTimerHandle;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Physics", meta = (AllowPrivateAccess = "true"))
 	float VelocityLimit = 2000.0f;
@@ -76,6 +74,7 @@ private:
 	int32 RemainingLives = Lives;
 
 	bool Ghosted = false;
+	bool Blinked = false;
 	
 	UFUNCTION()
 	void ShiftWorldOrigin();
@@ -87,5 +86,5 @@ private:
 	void Ghost();
 
 	UFUNCTION()
-	void ToggleGhostMaterial();
+	void Blink();
 };

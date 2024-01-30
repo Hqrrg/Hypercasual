@@ -7,6 +7,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "HypercasualGameMode.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ABoulder::ABoulder()
@@ -41,10 +42,10 @@ void ABoulder::BeginPlay()
 
 	SpawningLocationX = GetActorLocation().X;
 
-	FTimerHandle ShiftWorldOriginHandle;
-	GetWorldTimerManager().SetTimer(ShiftWorldOriginHandle, this, &ABoulder::ShiftWorldOrigin, 5.0f, true);
+	FTimerHandle ShiftWorldOriginTimerHandle;
+	GetWorldTimerManager().SetTimer(ShiftWorldOriginTimerHandle, this, &ABoulder::ShiftWorldOrigin, 5.0f, true);
 	
-	GetWorldTimerManager().SetTimer(PhysicsMovementHandle, this, &ABoulder::ApplyPhysicsMovement, 0.01f, true);
+	GetWorldTimerManager().SetTimer(MovementTimerHandle, this, &ABoulder::Move, 0.01f, true);
 
 	//Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
@@ -60,7 +61,7 @@ void ABoulder::BeginPlay()
 void ABoulder::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	DistanceTravelled = GetActorLocation().X - SpawningLocationX;
+	DistanceTravelled = (GetActorLocation().X - SpawningLocationX) / 10;
 }
 
 void ABoulder::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -83,7 +84,7 @@ void ABoulder::Build(const FInputActionValue &Value)
 	{
 		if (ABoulderController* BoulderController = Cast<ABoulderController>(Controller))
 		{
-			if (FHitResult* OutHit = BoulderController->GetWorldLocationFromMousePosition())
+			if (FHitResult* OutHit = BoulderController->GetHitFromMousePosition())
 			{
 				FActorSpawnParameters SpawnParams;
 				FVector SpawnLoc = OutHit->Location;
@@ -103,14 +104,9 @@ void ABoulder::CancelBuild(const FInputActionValue& Value)
 	if (BuildTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(BuildTimerHandle);
 }
 
-int32 ABoulder::GetRemainingLives()
+void ABoulder::Damage()
 {
-	return RemainingLives;
-}
-
-void ABoulder::DecrementLives()
-{
-	if (!Ghosted)
+	if (!Immune)
 	{
 		RemainingLives--;
 
@@ -118,17 +114,17 @@ void ABoulder::DecrementLives()
 		{
 			if (RemainingLives > 0)
 			{
-				Ghost();
+				ToggleImmunity();
 				return;
 			}
 
-			EndGame();
+			StopPhysicsMovement();
 			HypercasualGameMode->EndGame();
 		}
 	}
 }
 
-void ABoulder::ApplyPhysicsMovement()
+void ABoulder::Move()
 {
 	const FVector ForceDirection = FVector(1.0f, 0.0f, 0.0f);
 	const float Velocity = GetVelocity().Length();
@@ -137,66 +133,55 @@ void ABoulder::ApplyPhysicsMovement()
 	BoulderMeshComponent->AddForce(ForceDirection * ForceScaleFactor, NAME_None, true);
 }
 
-void ABoulder::Ghost()
+void ABoulder::ToggleImmunity()
 {
-	Ghosted = !Ghosted;
+	Immune = !Immune;
 	
-	if (Ghosted)
+	if (Immune)
 	{
-		//UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.5f);
+		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.5f);
 		
 		BoulderMeshComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
 
 		// Recursive Function Call After Timer Expiration
-		GetWorldTimerManager().SetTimer(ResetGhostedTimerHandle, this, &ABoulder::Ghost, 3.0f);
-		GetWorldTimerManager().SetTimer(BlinkTimerHandle, this, &ABoulder::Blink, 0.5f, true, 0.0f);
+		GetWorldTimerManager().SetTimer(ResetImmunityTimerHandle, this, &ABoulder::ToggleImmunity, 3.0f);
+		GetWorldTimerManager().SetTimer(BlinkTimerHandle, this, &ABoulder::ImmunityBlink, 0.5f, true, 0.0f);
 		
 	}
 	else
 	{
-		GetWorldTimerManager().ClearTimer(ResetGhostedTimerHandle);
+		GetWorldTimerManager().ClearTimer(ResetImmunityTimerHandle);
 		GetWorldTimerManager().ClearTimer(BlinkTimerHandle);
 		
 		BoulderMeshComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Overlap);
-		DynamicBoulderMaterial->SetScalarParameterValue("Opacity", 1.0f);
 		DynamicBoulderMaterial->SetVectorParameterValue("Colour", FLinearColor(1.0f, 1.0f, 1.0f, 1.0f));
 		
-		//UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
+		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
 	}
 }
 
-void ABoulder::Blink()
+void ABoulder::ImmunityBlink()
 {
 	FLinearColor Colour;
-	float Opacity;
-	
-	TArray<FMaterialParameterInfo> ScalarInfo;
-	TArray<FMaterialParameterInfo> VectorInfo;
-	TArray<FGuid> Guids;
-	
-	DynamicBoulderMaterial->GetAllVectorParameterInfo(VectorInfo, Guids);
-	DynamicBoulderMaterial->GetVectorParameterValue(VectorInfo[0], Colour);
-	
-	DynamicBoulderMaterial->GetAllScalarParameterInfo(ScalarInfo, Guids);
-	DynamicBoulderMaterial->GetScalarParameterValue(ScalarInfo[0], Opacity);
 
-	switch(Blinked)
+	switch (Blinked)
 	{
 	case true:
-		DynamicBoulderMaterial->SetVectorParameterValueByInfo(VectorInfo[0], FLinearColor(1.0f, 1.0f, 1.0f, 1.0f));
+		Colour = FLinearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		break;
 		
 	case false:
-		DynamicBoulderMaterial->SetVectorParameterValueByInfo(VectorInfo[0], FLinearColor(1.0f, 0.25f, 0.25f, 1.0f));
+		Colour = FLinearColor(0.5f, 0.5f, 0.5f, 1.0f);
 		break;
 	}
-	
+
+	DynamicBoulderMaterial->SetVectorParameterValue("Colour", Colour);
 	Blinked = !Blinked;
 }
 
-void ABoulder::EndGame()
+void ABoulder::StopPhysicsMovement()
 {
-	GetWorldTimerManager().ClearTimer(PhysicsMovementHandle);
+	GetWorldTimerManager().ClearTimer(MovementTimerHandle);
 	BoulderMeshComponent->SetSimulatePhysics(false);
 }
 

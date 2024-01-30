@@ -5,7 +5,6 @@
 #include "Tile.h"
 #include "HypercasualGameMode.h"
 
-
 // Sets default values
 AFollowCamera::AFollowCamera()
 {
@@ -20,8 +19,8 @@ AFollowCamera::AFollowCamera()
 
 	CullingBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CullingBox"));
 	CullingBox->SetupAttachment(RootComponent);
-	CullingBox->SetBoxExtent(FVector(100.0f, 5000.0f, 5000.0f));
-	CullingBox->SetRelativeLocation(FVector(-5000.0f, 0.0f, 0.0f));
+	CullingBox->SetBoxExtent(FVector(10.0f, 500.0f, 500.0f));
+	CullingBox->SetRelativeLocation(FVector(-500.0f, 0.0f, 0.0f));
 }
 
 // Called when the game starts or when spawned
@@ -76,7 +75,7 @@ void AFollowCamera::CullingBoxEndOverlap(UPrimitiveComponent* OverlappedComponen
 			if (OtherStaticMeshComponent == OverlappedTile->TileMeshComponent)
 			{
 				OverlappedTile->Destroy();
-
+				
 				if (AHypercasualGameMode* HypercasualGameMode = Cast<AHypercasualGameMode>(GetWorld()->GetAuthGameMode()))
 				{
 					HypercasualGameMode->SpawnNextTile();

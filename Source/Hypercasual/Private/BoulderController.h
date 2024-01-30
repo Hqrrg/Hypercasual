@@ -26,7 +26,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void SetCamera(AFollowCamera* NewCamera);
-	FHitResult* GetWorldLocationFromMousePosition();
+	FHitResult* GetHitFromMousePosition();
 
 private:
 	AFollowCamera* FollowCamera = nullptr;

@@ -47,25 +47,31 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	
-	int32 GetRemainingLives();
-	void DecrementLives();
-	void EndGame();
+	FORCEINLINE int32 GetRemainingLives() { return RemainingLives; };
+	FORCEINLINE int32 GetLives() { return Lives; }
+	
+	void Damage();
+	void StopPhysicsMovement();
+
+	FORCEINLINE void SetVelocityLimit(float NewLimit) { VelocityLimit = NewLimit; }
 
 private:
 	void Build(const FInputActionValue& Value);
 	void CancelBuild(const FInputActionValue& Value);
 
-	UMaterialInstanceDynamic* DynamicBoulderMaterial;
+	UMaterialInstanceDynamic* DynamicBoulderMaterial = nullptr;
 
 	FTimerHandle BuildTimerHandle;
-	FTimerHandle PhysicsMovementHandle;
-	FTimerHandle ResetGhostedTimerHandle;
+	FTimerHandle MovementTimerHandle;
+	FTimerHandle ResetImmunityTimerHandle;
 	FTimerHandle BlinkTimerHandle;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Physics", meta = (AllowPrivateAccess = "true"))
 	float VelocityLimit = 2000.0f;
-	
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	int32 DistanceTravelled = 0;
+	
 	int32 SpawningLocationX = 0;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Defaults", meta = (AllowPrivateAccess = "true"))
@@ -73,18 +79,18 @@ private:
 	
 	int32 RemainingLives = Lives;
 
-	bool Ghosted = false;
+	bool Immune = false;
 	bool Blinked = false;
 	
 	UFUNCTION()
 	void ShiftWorldOrigin();
 
 	UFUNCTION()
-	void ApplyPhysicsMovement();
+	void Move();
 
 	UFUNCTION()
-	void Ghost();
+	void ToggleImmunity();
 
 	UFUNCTION()
-	void Blink();
+	void ImmunityBlink();
 };

@@ -39,7 +39,7 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Tiles", meta = (AllowPrivateAccess = "true"))
 	TMap<TSubclassOf<ATile>, TEnumAsByte<TileRarity>> TileFabs;
-
-	void SpawnNextTile();
+	
+	ATile* SpawnNextTile();
 	void EndGame();
 };

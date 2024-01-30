@@ -17,7 +17,7 @@ ABarrier::ABarrier()
 	SetRootComponent(BarrierSpline);
 	BarrierSpline->ClearSplinePoints();
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> BarrierMeshAsset(TEXT("/Engine/BasicShapes/Cube.Cube"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> BarrierMeshAsset(TEXT("/Game/Hypercasual/Meshes/SM_Barrier.SM_Barrier"));
 
 	if (BarrierMeshAsset.Succeeded()) BarrierMesh = BarrierMeshAsset.Object;
 
@@ -47,9 +47,7 @@ void ABarrier::AddNextPoint()
 
 	if (BarrierMesh && BoulderController)
 	{
-		FHitResult* OutHit = BoulderController->GetWorldLocationFromMousePosition();
-
-		if (OutHit)
+		if (FHitResult* OutHit = BoulderController->GetHitFromMousePosition())
 		{
 			if (OutHit->PhysMaterial.Get())
 			{
@@ -57,11 +55,11 @@ void ABarrier::AddNextPoint()
 
 				if (PhysicalMaterial->SurfaceType == EPhysicalSurface::SurfaceType1 && BarrierSpline->GetSplineLength() <= MAX_SPLINE_LENGTH)
 				{
-					FVector Loc = OutHit->Location;
-
-					if ((Loc-LastPointPosition).Length() >= 200.0f)
+					const FVector BarrierMeshBoundingBoxSize = BarrierMesh->GetBoundingBox().GetSize();
+					
+					if (const FVector Loc = OutHit->Location; (Loc-LastPointPosition).Length() >= BarrierMeshBoundingBoxSize.Length() && (Loc-BoulderController->GetPawn()->GetActorLocation()).Length() > BarrierMeshBoundingBoxSize.Length() + 10.0f)
 					{
-						FVector PointPosition = FVector(Loc.X, Loc.Y, Loc.Z + (BarrierMesh->GetBoundingBox().GetSize().Y / 2));
+						FVector PointPosition = FVector(Loc.X, Loc.Y, Loc.Z + (BarrierMeshBoundingBoxSize.Y / 2));
  
 						//Recursively call this function or another within this function to re-calculate spline points to be evenly spaced out.
 						BarrierSpline->AddSplinePoint(PointPosition, ESplineCoordinateSpace::World, true);
@@ -94,7 +92,6 @@ void ABarrier::AddNextPoint()
 
 void ABarrier::AddMeshComponents()
 {
-	// Change method for adding meshes to spline */
 	for (int32 i = 0; i < BarrierSpline->GetNumberOfSplinePoints()-1; i++)
 	{
 		BarrierSpline->GetSplinePointsPosition().Points[i].InterpMode = CIM_CurveAuto;

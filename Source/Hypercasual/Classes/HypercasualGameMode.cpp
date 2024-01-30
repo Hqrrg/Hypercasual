@@ -23,7 +23,7 @@ void AHypercasualGameMode::BeginPlay()
 
 	for (int32 i = 0; i < 5; i++)
 	{
-		SpawnNextTile();
+		ATile* NextTile = SpawnNextTile();
 	}
 }
 
@@ -45,7 +45,7 @@ APlayerController* AHypercasualGameMode::SpawnPlayerController(ENetRole InRemote
 	
 }
 
-void AHypercasualGameMode::SpawnNextTile()
+ATile* AHypercasualGameMode::SpawnNextTile()
 {
 	if (LastTile) NextTileTransform = LastTile->GetAttachPointTransform();
 
@@ -67,6 +67,8 @@ void AHypercasualGameMode::SpawnNextTile()
 		NextTile->FinishSpawning(NextTileTransform);
 		LastTile = NextTile;
 	}
+	
+	return LastTile;
 }
 
 void AHypercasualGameMode::EndGame()

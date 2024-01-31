@@ -39,7 +39,7 @@ void AFollowCamera::Tick(float DeltaTime)
 	if (FollowTarget)
 	{
 		FVector TargetLocation = FollowTarget->GetActorLocation();
-		FVector NewActorLocation = FVector(TargetLocation.X, FMath::Clamp(TargetLocation.Y, -1000.0 , 1000.0), TargetLocation.Z);
+		FVector NewActorLocation = FVector(TargetLocation.X, FMath::Clamp(TargetLocation.Y, -150.0 , 150.0), TargetLocation.Z);
 		
 		SetActorLocation(NewActorLocation);
 		CameraComponent->SetWorldLocation(NewActorLocation + Offset);

@@ -5,6 +5,8 @@
 #include "Tile.h"
 #include "BoulderController.h"
 #include "FollowCamera.h"
+#include "Boulder.h"
+#include "Kismet/GameplayStatics.h"
 
 AHypercasualGameMode::AHypercasualGameMode()
 {
@@ -23,7 +25,7 @@ void AHypercasualGameMode::BeginPlay()
 
 	for (int32 i = 0; i < 5; i++)
 	{
-		ATile* NextTile = SpawnNextTile();
+		SpawnNextTile();
 	}
 }
 

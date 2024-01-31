@@ -39,7 +39,7 @@ public:
 	void AddNextPoint();
 
 private:
-	int32 MAX_SPLINE_LENGTH = 1500;
+	int32 MAX_SPLINE_LENGTH = 150;
 	TArray<USplineMeshComponent*> BarrierMeshComps;
 	FTimerHandle DecayTimerHandle;
 	FVector LastPointPosition;

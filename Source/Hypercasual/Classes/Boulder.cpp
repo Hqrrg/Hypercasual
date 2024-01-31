@@ -2,12 +2,14 @@
 
 
 #include "Boulder.h"
-#include "Barrier.h"
 #include "BoulderController.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "HypercasualGameMode.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
+
+#define OBSTACLE_COLLISION_CHANNEL ECC_EngineTraceChannel1
 
 // Sets default values
 ABoulder::ABoulder()
@@ -17,8 +19,9 @@ ABoulder::ABoulder()
 
 	BoulderMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BoulderMesh"));
 	BoulderMeshComponent->SetSimulatePhysics(true);
-	BoulderMeshComponent->BodyInstance.bNotifyRigidBodyCollision = true;
 	SetRootComponent(BoulderMeshComponent);
+
+	BoulderMeshComponent->SetCollisionResponseToChannel(OBSTACLE_COLLISION_CHANNEL, ECR_Overlap);
 }
 
 void ABoulder::OnConstruction(const FTransform& Transform)
@@ -26,12 +29,6 @@ void ABoulder::OnConstruction(const FTransform& Transform)
 	if (BoulderMesh)
 	{
 		BoulderMeshComponent->SetStaticMesh(BoulderMesh);
-		
-		if (BoulderMaterial)
-		{
-			DynamicBoulderMaterial = UMaterialInstanceDynamic::Create(BoulderMaterial, this);
-			BoulderMesh->SetMaterial(0, DynamicBoulderMaterial);
-		}
 	}
 }
 
@@ -39,6 +36,12 @@ void ABoulder::OnConstruction(const FTransform& Transform)
 void ABoulder::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (BoulderMaterial)
+	{
+		DynamicBoulderMaterial = UMaterialInstanceDynamic::Create(BoulderMaterial, this);
+		BoulderMeshComponent->SetMaterial(0, DynamicBoulderMaterial);
+	}
 
 	SpawningLocationX = GetActorLocation().X;
 
@@ -76,8 +79,6 @@ void ABoulder::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	}
 }
 
-ABarrier* Barrier = nullptr;
-
 void ABoulder::Build(const FInputActionValue &Value)
 {
 	if (!BuildTimerHandle.IsValid())
@@ -90,9 +91,9 @@ void ABoulder::Build(const FInputActionValue &Value)
 				FVector SpawnLoc = OutHit->Location;
 				FRotator SpawnRot = FRotator(0.0f, 0.0f, 0.0f);
 
-				Barrier = GetWorld()->SpawnActor<ABarrier>(SpawnLoc, SpawnRot, SpawnParams);
+				CurrentBarrier = GetWorld()->SpawnActor<ABarrier>(SpawnLoc, SpawnRot, SpawnParams);
 
-				GetWorldTimerManager().SetTimer(BuildTimerHandle, Barrier, &ABarrier::AddNextPoint, 0.001f, true, 0.0f);
+				GetWorldTimerManager().SetTimer(BuildTimerHandle, CurrentBarrier, &ABarrier::AddNextPoint, 0.001f, true, 0.0f);
 			}
 		}
 	}
@@ -100,11 +101,11 @@ void ABoulder::Build(const FInputActionValue &Value)
 
 void ABoulder::CancelBuild(const FInputActionValue& Value)
 {
-	if (Barrier) Barrier = nullptr;
+	if (CurrentBarrier) CurrentBarrier = nullptr;
 	if (BuildTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(BuildTimerHandle);
 }
 
-void ABoulder::Damage()
+bool ABoulder::Kill()
 {
 	if (!Immune)
 	{
@@ -115,22 +116,28 @@ void ABoulder::Damage()
 			if (RemainingLives > 0)
 			{
 				ToggleImmunity();
-				return;
+				return false;
 			}
 
 			StopPhysicsMovement();
 			HypercasualGameMode->EndGame();
+			return true;
 		}
 	}
+	return false;
 }
 
 void ABoulder::Move()
 {
+	const FVector Velocity = GetVelocity();
 	const FVector ForceDirection = FVector(1.0f, 0.0f, 0.0f);
-	const float Velocity = GetVelocity().Length();
-	const float ForceScaleFactor = FMath::GetMappedRangeValueClamped(FVector2D(VelocityLimit-5, VelocityLimit), FVector2D(VelocityLimit, 0), Velocity);
+	const float ForceMultiplier = FMath::GetMappedRangeValueClamped(FVector2D(VelocityLimit-5, VelocityLimit), FVector2D(VelocityLimit, 0), Velocity.Length());
 
-	BoulderMeshComponent->AddForce(ForceDirection * ForceScaleFactor, NAME_None, true);
+	BoulderMeshComponent->AddForce(ForceDirection * ForceMultiplier, NAME_None, true);
+
+	const FRotator ActorRotation = GetActorRotation();
+	const FRotator DesiredRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), GetActorLocation() + Velocity);
+	//SetActorRotation(UKismetMathLibrary::RInterpTo(GetActorRotation(), FRotator(ActorRotation.Pitch, DesiredRotation.Yaw, ActorRotation.Roll), UGameplayStatics::GetWorldDeltaSeconds(GetWorld()), 0.1f));
 }
 
 void ABoulder::ToggleImmunity()
@@ -141,20 +148,20 @@ void ABoulder::ToggleImmunity()
 	{
 		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.5f);
 		
-		BoulderMeshComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
+		BoulderMeshComponent->SetCollisionResponseToChannel(OBSTACLE_COLLISION_CHANNEL, ECR_Ignore);
 
 		// Recursive Function Call After Timer Expiration
-		GetWorldTimerManager().SetTimer(ResetImmunityTimerHandle, this, &ABoulder::ToggleImmunity, 3.0f);
-		GetWorldTimerManager().SetTimer(BlinkTimerHandle, this, &ABoulder::ImmunityBlink, 0.5f, true, 0.0f);
+		GetWorldTimerManager().SetTimer(ResetImmunityTimerHandle, this, &ABoulder::ToggleImmunity, 1.5f);
+		GetWorldTimerManager().SetTimer(BlinkTimerHandle, this, &ABoulder::ImmunityBlink, 0.05f, true, 0.0f);
 		
 	}
 	else
 	{
 		GetWorldTimerManager().ClearTimer(ResetImmunityTimerHandle);
 		GetWorldTimerManager().ClearTimer(BlinkTimerHandle);
-		
-		BoulderMeshComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Overlap);
-		DynamicBoulderMaterial->SetVectorParameterValue("Colour", FLinearColor(1.0f, 1.0f, 1.0f, 1.0f));
+
+		BoulderMeshComponent->SetCollisionResponseToChannel(OBSTACLE_COLLISION_CHANNEL, ECR_Overlap);
+		if (DynamicBoulderMaterial) DynamicBoulderMaterial->SetVectorParameterValue("Colour", FLinearColor(1.0f, 1.0f, 1.0f, 1.0f));
 		
 		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
 	}
@@ -175,7 +182,8 @@ void ABoulder::ImmunityBlink()
 		break;
 	}
 
-	DynamicBoulderMaterial->SetVectorParameterValue("Colour", Colour);
+	if (DynamicBoulderMaterial) DynamicBoulderMaterial->SetVectorParameterValue("Colour", Colour);
+	
 	Blinked = !Blinked;
 }
 
@@ -190,10 +198,13 @@ void ABoulder::ShiftWorldOrigin()
 	const FVector ActorLocation = GetActorLocation();
 	UWorld* World = GetWorld();
 
-	if (FMath::Abs(ActorLocation.X) > 10000) 
+	if (FMath::Abs(ActorLocation.X) > 50000) 
 	{
 		World->SetNewWorldOrigin(FIntVector(ActorLocation.X, 0.0f, 0.0f) + World->OriginLocation);
 		SpawningLocationX-=ActorLocation.X;
+
+		// Avoid being sent into the stratosphere
+		SetActorLocation(FVector(0.0f, ActorLocation.Y, ActorLocation.Z));
 	}
 }
 

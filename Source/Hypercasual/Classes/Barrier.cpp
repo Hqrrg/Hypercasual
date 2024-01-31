@@ -59,7 +59,7 @@ void ABarrier::AddNextPoint()
 					
 					if (const FVector Loc = OutHit->Location; (Loc-LastPointPosition).Length() >= BarrierMeshBoundingBoxSize.Length() && (Loc-BoulderController->GetPawn()->GetActorLocation()).Length() > BarrierMeshBoundingBoxSize.Length() + 10.0f)
 					{
-						FVector PointPosition = FVector(Loc.X, Loc.Y, Loc.Z + (BarrierMeshBoundingBoxSize.Y / 2));
+						FVector PointPosition = FVector(Loc.X, Loc.Y, Loc.Z + (BarrierMeshBoundingBoxSize.Z / 2));
  
 						//Recursively call this function or another within this function to re-calculate spline points to be evenly spaced out.
 						BarrierSpline->AddSplinePoint(PointPosition, ESplineCoordinateSpace::World, true);

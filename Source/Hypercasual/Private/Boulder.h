@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Barrier.h"
 #include "EnhancedInputSubsystemInterface.h"
 #include "InputAction.h"
 #include "Components/StaticMeshComponent.h"
@@ -50,7 +51,7 @@ public:
 	FORCEINLINE int32 GetRemainingLives() { return RemainingLives; };
 	FORCEINLINE int32 GetLives() { return Lives; }
 	
-	void Damage();
+	bool Kill();
 	void StopPhysicsMovement();
 
 	FORCEINLINE void SetVelocityLimit(float NewLimit) { VelocityLimit = NewLimit; }
@@ -58,6 +59,8 @@ public:
 private:
 	void Build(const FInputActionValue& Value);
 	void CancelBuild(const FInputActionValue& Value);
+
+	ABarrier* CurrentBarrier = nullptr;
 
 	UMaterialInstanceDynamic* DynamicBoulderMaterial = nullptr;
 
@@ -67,7 +70,7 @@ private:
 	FTimerHandle BlinkTimerHandle;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Physics", meta = (AllowPrivateAccess = "true"))
-	float VelocityLimit = 2000.0f;
+	float VelocityLimit = 200.0f;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	int32 DistanceTravelled = 0;

@@ -54,7 +54,7 @@ public:
 	bool Kill();
 	void StopPhysicsMovement();
 
-	FORCEINLINE void SetVelocityLimit(float NewLimit) { VelocityLimit = NewLimit; }
+	FORCEINLINE void SetVelocityLimit(float NewLimit) { Acceleration = NewLimit; }
 
 private:
 	void Build(const FInputActionValue& Value);
@@ -62,15 +62,19 @@ private:
 
 	ABarrier* CurrentBarrier = nullptr;
 
-	UMaterialInstanceDynamic* DynamicBoulderMaterial = nullptr;
-
 	FTimerHandle BuildTimerHandle;
 	FTimerHandle MovementTimerHandle;
 	FTimerHandle ResetImmunityTimerHandle;
 	FTimerHandle BlinkTimerHandle;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Physics", meta = (AllowPrivateAccess = "true"))
-	float VelocityLimit = 200.0f;
+	float Acceleration = 200.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Physics", meta = (AllowPrivateAccess = "true"))
+	float VelocityLimit = 500.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Physics", meta = (AllowPrivateAccess = "true"))
+	int32 VelocityIncreaseInterval = 1000;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	int32 DistanceTravelled = 0;
@@ -83,7 +87,6 @@ private:
 	int32 RemainingLives = Lives;
 
 	bool Immune = false;
-	bool Blinked = false;
 	
 	UFUNCTION()
 	void ShiftWorldOrigin();

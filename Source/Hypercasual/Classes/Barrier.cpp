@@ -21,10 +21,10 @@ ABarrier::ABarrier()
 
 	if (BarrierMeshAsset.Succeeded()) BarrierMesh = BarrierMeshAsset.Object;
 
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> BarrierMaterialAsset(TEXT("/Game/Hypercasual/Materials/M_Barrier.M_Barrier"));
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> BarrierMaterialAsset(TEXT("/Game/Hypercasual/Materials/Barrier/M_Barrier.M_Barrier"));
 	if (BarrierMaterialAsset.Succeeded()) BarrierMaterial = BarrierMaterialAsset.Object;
 	
-	if (BarrierMesh) BarrierMesh->SetMaterial(0, BarrierMaterial);
+	if (BarrierMesh && BarrierMaterial) BarrierMesh->SetMaterial(0, BarrierMaterial);
 
 	LastPointPosition = FVector::ZeroVector;
 }

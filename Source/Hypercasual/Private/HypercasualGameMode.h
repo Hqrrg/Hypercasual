@@ -39,7 +39,9 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Tiles", meta = (AllowPrivateAccess = "true"))
 	TMap<TSubclassOf<ATile>, TEnumAsByte<TileRarity>> TileFabs;
-	
+
 	ATile* SpawnNextTile();
-	void EndGame();
+	
+	UFUNCTION(BlueprintNativeEvent)
+	void TerminateSession(int32 DistanceTravelled);
 };

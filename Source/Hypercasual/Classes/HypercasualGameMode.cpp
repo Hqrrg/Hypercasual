@@ -91,7 +91,7 @@ ATile* AHypercasualGameMode::SpawnNextTile()
 	return LastTile;
 }
 
-void AHypercasualGameMode::EndGame()
+void AHypercasualGameMode::TerminateSession_Implementation(int32 DistanceTravelled)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, FString("Game Over!"));
 }

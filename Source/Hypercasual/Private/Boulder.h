@@ -65,7 +65,7 @@ private:
 	FTimerHandle BuildTimerHandle;
 	FTimerHandle MovementTimerHandle;
 	FTimerHandle ResetImmunityTimerHandle;
-	FTimerHandle ToggleVisibilityTimerHandle;
+	FTimerHandle BlinkTimerHandle;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Physics", meta = (AllowPrivateAccess = "true"))
 	float Acceleration = 200.0f;
@@ -98,5 +98,5 @@ private:
 	void ToggleImmunity();
 
 	UFUNCTION()
-	void ToggleVisibility();
+	void ImmunityBlink();
 };

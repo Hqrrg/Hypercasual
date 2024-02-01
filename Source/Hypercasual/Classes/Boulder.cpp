@@ -145,7 +145,7 @@ bool ABoulder::Kill()
 
 			// Killed, end session
 			StopPhysicsMovement();
-			HypercasualGameMode->TerminateSession(DistanceTravelled);
+			HypercasualGameMode->EndGame();
 			return true;
 		}
 	}
@@ -181,14 +181,14 @@ void ABoulder::ToggleImmunity()
 		// Recursive function call after timer expiration, 1.0f = 2s due to time dilation
 		GetWorldTimerManager().SetTimer(ResetImmunityTimerHandle, this, &ABoulder::ToggleImmunity, 1.5f);
 		// Initialise looping timer to rapidly change the actor's visibility in game
-		GetWorldTimerManager().SetTimer(ToggleVisibilityTimerHandle, this, &ABoulder::ToggleVisibility, 0.05f, true, 0.0f);
+		GetWorldTimerManager().SetTimer(BlinkTimerHandle, this, &ABoulder::ImmunityBlink, 0.05f, true, 0.0f);
 		
 	}
 	else
 	{
 		// Once no longer immune, clear previously instantiated timers
 		GetWorldTimerManager().ClearTimer(ResetImmunityTimerHandle);
-		GetWorldTimerManager().ClearTimer(ToggleVisibilityTimerHandle);
+		GetWorldTimerManager().ClearTimer(BlinkTimerHandle);
 
 		// Set collision response for obstacle's to overlap
 		BoulderMeshComponent->SetCollisionResponseToChannel(OBSTACLE_COLLISION_CHANNEL, ECR_Overlap);
@@ -201,7 +201,7 @@ void ABoulder::ToggleImmunity()
 }
 
 // Toggles actor visibility in game
-void ABoulder::ToggleVisibility()
+void ABoulder::ImmunityBlink()
 {
 	SetActorHiddenInGame(!IsHidden());
 }

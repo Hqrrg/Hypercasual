@@ -6,6 +6,7 @@
 #include "BoulderController.h"
 #include "FollowCamera.h"
 #include "Boulder.h"
+#include "VectorTypes.h"
 #include "Kismet/GameplayStatics.h"
 
 AHypercasualGameMode::AHypercasualGameMode()
@@ -16,6 +17,8 @@ AHypercasualGameMode::AHypercasualGameMode()
 void AHypercasualGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+
+	HypercasualGameInstance = Cast<UHypercasualGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 
 	if (SpawningTile)
 	{
@@ -58,7 +61,7 @@ ATile* AHypercasualGameMode::SpawnNextTile()
 	TArray<TSubclassOf<ATile>> TileArray;
 
 	// Populate array of tiles based on their rarity
-	for (const TPair<TSubclassOf<ATile>, TileRarity> Element : TileFabs)
+	for (const TPair<TSubclassOf<ATile>, ETileRarity> Element : TileFabs)
 	{
 		for (int32 i = 0; i < Element.Value + 1; i++)
 		{
@@ -91,7 +94,15 @@ ATile* AHypercasualGameMode::SpawnNextTile()
 	return LastTile;
 }
 
-void AHypercasualGameMode::EndGame()
+void AHypercasualGameMode::EndGame_Implementation(int32 DistanceTravelled)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, FString("Game Over!"));
+	if (HypercasualGameInstance)
+	{
+		if (HypercasualGameInstance->Record < DistanceTravelled)
+		{
+			HypercasualGameInstance->Record = DistanceTravelled;
+			HypercasualGameInstance->SaveProfile();
+		}
+	}
+	
 }

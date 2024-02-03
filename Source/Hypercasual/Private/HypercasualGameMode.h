@@ -3,16 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "HypercasualGameInstance.h"
+#include "PickupComponent.h"
 #include "Tile.h"
 #include "GameFramework/GameModeBase.h"
 #include "HypercasualGameMode.generated.h"
 
 UENUM(BlueprintType)
-enum TileRarity : uint8
+enum ETileRarity : uint8
 {
-	RARE = 0,
-	UNCOMMON = 1,
-	COMMON = 2
+	ETR_Rare = 0,
+	ETR_Uncommon = 1,
+	ETR_Common = 2
 };
 
 UCLASS(minimalapi)
@@ -30,16 +32,25 @@ protected:
 
 private:
 	FTransform NextTileTransform;
+
+	UPROPERTY()
 	ATile* LastTile = nullptr;
 
 public:
-
+	UPROPERTY(BlueprintReadOnly)
+	UHypercasualGameInstance* HypercasualGameInstance = nullptr;
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Tiles", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<ATile> SpawningTile = nullptr;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Tiles", meta = (AllowPrivateAccess = "true"))
-	TMap<TSubclassOf<ATile>, TEnumAsByte<TileRarity>> TileFabs;
+	TMap<TSubclassOf<ATile>, TEnumAsByte<ETileRarity>> TileFabs;
+	
+	UPROPERTY()
+	bool HasBeatenRecord = false;
 	
 	ATile* SpawnNextTile();
-	void EndGame();
+
+	UFUNCTION(BlueprintNativeEvent)
+	void EndGame(int32 DistanceTravelled);
 };

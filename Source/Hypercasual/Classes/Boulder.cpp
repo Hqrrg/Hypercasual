@@ -5,7 +5,6 @@
 #include "BoulderController.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "HypercasualGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -42,6 +41,8 @@ void ABoulder::OnConstruction(const FTransform& Transform)
 void ABoulder::BeginPlay()
 {
 	Super::BeginPlay();
+
+	HypercasualGameMode = Cast<AHypercasualGameMode>(GetWorld()->GetAuthGameMode());
 	
 	SpawningLocationX = GetActorLocation().X;
 
@@ -62,8 +63,6 @@ void ABoulder::BeginPlay()
 	}
 }
 
-float LastVelocityIncreaseInterval = 0.0f;
-
 // Called every frame
 void ABoulder::Tick(float DeltaTime)
 {
@@ -71,6 +70,15 @@ void ABoulder::Tick(float DeltaTime)
 
 	// Update distance travelled, dividing by 10 for a nicer number
 	DistanceTravelled = (GetActorLocation().X - SpawningLocationX) / 10;
+
+	const int32 CurrentHighScore = HypercasualGameMode->HypercasualGameInstance->Record;
+	
+	// If distance travelled is a new high score, notify listeners
+	if (!HypercasualGameMode->HasBeatenRecord && DistanceTravelled > CurrentHighScore && CurrentHighScore > 0)
+	{
+		HypercasualGameMode->HypercasualGameInstance->OnNewRecord.Broadcast();
+		HypercasualGameMode->HasBeatenRecord = true;
+	}
 
 	// If the current acceleration has not surpassed the velocity limit, increment it every specified interval of distance travelled
 	if (DistanceTravelled != LastVelocityIncreaseInterval && DistanceTravelled % VelocityIncreaseInterval == 0 && Acceleration < VelocityLimit)
@@ -134,7 +142,7 @@ bool ABoulder::Kill()
 		// Decrement lives by 1
 		RemainingLives--;
 
-		if (AHypercasualGameMode* HypercasualGameMode = Cast<AHypercasualGameMode>(GetWorld()->GetAuthGameMode()))
+		if (HypercasualGameMode)
 		{
 			// Give temporary immunity to the player if they have remaining lives
 			if (RemainingLives > 0)
@@ -145,7 +153,7 @@ bool ABoulder::Kill()
 
 			// Killed, end session
 			StopPhysicsMovement();
-			HypercasualGameMode->EndGame();
+			HypercasualGameMode->EndGame(DistanceTravelled);
 			return true;
 		}
 	}
@@ -156,13 +164,24 @@ bool ABoulder::Kill()
 void ABoulder::Move()
 {
 	const FVector Velocity = GetVelocity();
-	// Direction to apply force in, i.e. forward
-	const FVector ForceDirection = FVector(1.0f, 0.0f, 0.0f);
+	// Direction to apply force in, default forward
+	FVector ForceDirection = FVector(1.0f, 0.0f, 0.0f);
+
+	// Moving
+	if (Velocity.Length() > 0)
+	{
+		// Change force direction to match that of velocity
+		ForceDirection = FVector(UKismetMathLibrary::Abs(Velocity.X), Velocity.Y, Velocity.Z);
+	}
 	// Determine force to be applied based on the boulder's current velocity
 	const float ForceMultiplier = FMath::GetMappedRangeValueClamped(FVector2D(Acceleration-5, Acceleration), FVector2D(Acceleration, 0), Velocity.Length());
 
-	// Apply force
-	BoulderMeshComponent->AddForce(ForceDirection * ForceMultiplier, NAME_None, true);
+	// Normalise direction vector
+	if (ForceDirection.Normalize())
+	{
+		// Apply force
+		BoulderMeshComponent->AddForce(ForceDirection * ForceMultiplier, NAME_None, true);
+	}
 }
 
 // Toggles the player's immune state
@@ -172,36 +191,38 @@ void ABoulder::ToggleImmunity()
 	
 	if (Immune)
 	{
-		// Decrease game time to half
-		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.5f);
+		// Decrease game time to half - DISABLED | Sometimes does not trigger when toggling immunity in quick succession
+		//UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.5f);
 
+		Acceleration = DefaultAcceleration;
+		
 		// Set collision response for obstacle's to ignore
 		BoulderMeshComponent->SetCollisionResponseToChannel(OBSTACLE_COLLISION_CHANNEL, ECR_Ignore);
 
 		// Recursive function call after timer expiration, 1.0f = 2s due to time dilation
-		GetWorldTimerManager().SetTimer(ResetImmunityTimerHandle, this, &ABoulder::ToggleImmunity, 1.5f);
+		GetWorldTimerManager().SetTimer(ResetImmunityTimerHandle, this, &ABoulder::ToggleImmunity, 3.0f);
 		// Initialise looping timer to rapidly change the actor's visibility in game
-		GetWorldTimerManager().SetTimer(BlinkTimerHandle, this, &ABoulder::ImmunityBlink, 0.05f, true, 0.0f);
+		GetWorldTimerManager().SetTimer(ToggleVisibilityTimerHandle, this, &ABoulder::ToggleVisibility, 0.1f, true, 0.0f);
 		
 	}
 	else
 	{
 		// Once no longer immune, clear previously instantiated timers
 		GetWorldTimerManager().ClearTimer(ResetImmunityTimerHandle);
-		GetWorldTimerManager().ClearTimer(BlinkTimerHandle);
+		GetWorldTimerManager().ClearTimer(ToggleVisibilityTimerHandle);
 
 		// Set collision response for obstacle's to overlap
 		BoulderMeshComponent->SetCollisionResponseToChannel(OBSTACLE_COLLISION_CHANNEL, ECR_Overlap);
 		// Ensure actor is visible
 		SetActorHiddenInGame(false);
 
-		// Reset game time to normal
-		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
+		// Reset game time to normal - DISABLED | Sometimes does not trigger when toggling immunity in quick succession
+		//UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
 	}
 }
 
 // Toggles actor visibility in game
-void ABoulder::ImmunityBlink()
+void ABoulder::ToggleVisibility()
 {
 	SetActorHiddenInGame(!IsHidden());
 }

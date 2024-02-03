@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Barrier.h"
 #include "EnhancedInputSubsystemInterface.h"
+#include "HypercasualGameMode.h"
 #include "InputAction.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
@@ -57,18 +58,22 @@ public:
 	FORCEINLINE void SetVelocityLimit(float NewLimit) { Acceleration = NewLimit; }
 
 private:
+	UPROPERTY()
+	AHypercasualGameMode* HypercasualGameMode = nullptr;
+	
 	void Build(const FInputActionValue& Value);
 	void CancelBuild(const FInputActionValue& Value);
-
-	ABarrier* CurrentBarrier = nullptr;
 
 	FTimerHandle BuildTimerHandle;
 	FTimerHandle MovementTimerHandle;
 	FTimerHandle ResetImmunityTimerHandle;
-	FTimerHandle BlinkTimerHandle;
+	FTimerHandle ToggleVisibilityTimerHandle;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Physics", meta = (AllowPrivateAccess = "true"))
 	float Acceleration = 200.0f;
+
+	UPROPERTY()
+	float DefaultAcceleration = Acceleration;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Physics", meta = (AllowPrivateAccess = "true"))
 	float VelocityLimit = 500.0f;
@@ -83,10 +88,11 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Defaults", meta = (AllowPrivateAccess = "true"))
 	int32 Lives = 3;
-	
-	int32 RemainingLives = Lives;
 
+	ABarrier* CurrentBarrier = nullptr;
+	int32 RemainingLives = Lives;
 	bool Immune = false;
+	float LastVelocityIncreaseInterval = 0.0f;
 	
 	UFUNCTION()
 	void ShiftWorldOrigin();
@@ -98,5 +104,5 @@ private:
 	void ToggleImmunity();
 
 	UFUNCTION()
-	void ImmunityBlink();
+	void ToggleVisibility();
 };

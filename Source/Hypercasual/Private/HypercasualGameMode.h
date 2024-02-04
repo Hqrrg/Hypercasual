@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "HypercasualGameInstance.h"
-#include "PickupComponent.h"
 #include "Tile.h"
 #include "GameFramework/GameModeBase.h"
 #include "HypercasualGameMode.generated.h"

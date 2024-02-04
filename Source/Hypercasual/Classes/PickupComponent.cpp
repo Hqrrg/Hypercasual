@@ -2,29 +2,34 @@
 
 
 #include "PickupComponent.h"
-#include "Boulder.h"
 
 
+// Sets default values for this component's properties
 UPickupComponent::UPickupComponent()
 {
+	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
+	// off to improve performance if you don't need them.
+	PrimaryComponentTick.bCanEverTick = true;
+
+	// ...
 }
 
-void UPickupComponent::OnComponentCreated()
-{
-	Super::OnComponentCreated();
 
-	this->OnComponentBeginOverlap.AddDynamic(this, &UPickupComponent::BeginOverlap);
-}
-
+// Called when the game starts
 void UPickupComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// ...
+	
 }
 
-void UPickupComponent::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+
+// Called every frame
+void UPickupComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	if (ABoulder* Boulder = Cast<ABoulder>(OtherActor))
-	{
-		DestroyComponent();
-	}
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	// ...
 }
+

@@ -3,32 +3,24 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/StaticMeshComponent.h"
+#include "Components/BillboardComponent.h"
 #include "PickupComponent.generated.h"
 
-/**
- * 
- */
 
-UENUM(BlueprintType)
-enum EPickupRarity : uint8
-{
-	EPR_Rare = 0,
-	EPR_Uncommon = 1,
-	EPR_Common = 2
-};
-
-UCLASS(ClassGroup = ("Custom"), meta = (BlueprintSpawnableComponent))
-class HYPERCASUAL_API UPickupComponent : public UStaticMeshComponent
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+class HYPERCASUAL_API UPickupComponent : public UBillboardComponent
 {
 	GENERATED_BODY()
 
+public:
+	// Sets default values for this component's properties
+	UPickupComponent();
+
 protected:
-	virtual void OnComponentCreated() override;
+	// Called when the game starts
 	virtual void BeginPlay() override;
-	
-private:
-	UFUNCTION()
-	void BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult);
-	
+
+public:
+	// Called every frame
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 };

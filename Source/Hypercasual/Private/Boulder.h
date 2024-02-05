@@ -88,7 +88,8 @@ private:
 	FTimerHandle ResetImmunityTimerHandle;
 	FTimerHandle ToggleVisibilityTimerHandle;
 	FTimerHandle TemporaryVelocityBoostTimerHandle;
-	FTimerHandle SlowTimerHandle;
+	FTimerHandle BrakeTimerHandle;
+	FTimerHandle UpgradedBarrierTimerHandle;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Physics", meta = (AllowPrivateAccess = "true"))
 	float Acceleration = 200.0f;
@@ -118,6 +119,7 @@ private:
 	float LastVelocityIncreaseInterval = 0.0f;
 	float CachedAcceleration = 0.0f;
 	float CachedVelocityLimit = 0.0f;
+	bool HasUpgradedBarrier = false;
 	
 	UFUNCTION()
 	void ShiftWorldOrigin();

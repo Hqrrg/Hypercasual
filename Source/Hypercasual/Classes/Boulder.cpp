@@ -289,7 +289,7 @@ void ABoulder::ToggleTemporaryVelocityBoost(float Duration, bool ForceBoost)
 		SetVelocityLimit(CachedVelocityLimit);
 		SetAcceleration(CachedAcceleration);
 		
-		GetWorld()->GetTimerManager().SetTimer(SlowTimerHandle, this, &ABoulder::Brake, 0.01, true);
+		GetWorld()->GetTimerManager().SetTimer(BrakeTimerHandle, this, &ABoulder::Brake, 0.01, true);
 	}
 }
 
@@ -305,7 +305,7 @@ void ABoulder::Brake()
 			return;
 		}
 	}
-	GetWorldTimerManager().ClearTimer(SlowTimerHandle);
+	GetWorldTimerManager().ClearTimer(BrakeTimerHandle);
 }
 
 // Shifts the world origin to prevent floating point precision errors

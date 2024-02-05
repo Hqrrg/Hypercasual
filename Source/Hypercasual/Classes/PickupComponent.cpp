@@ -30,9 +30,9 @@ void UPickupComponent::BeginPlay()
 
 void UPickupComponent::SpawnPickup()
 {
-	int32 DiceResult = FMath::RandRange(1, 6);
+	int32 DiceResult = FMath::RandRange(1, 12);
 	
-	if (DiceResult == 6)
+	if (DiceResult == 12)
 	{
 		if (AHypercasualGameMode* HypercasualGameMode = Cast<AHypercasualGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
 		{

@@ -12,9 +12,10 @@
 UENUM()
 enum EPickupRarity : uint8
 {
-	EPR_RARE = 0,
-	EPR_UNCOMMON = 1,
-	EPR_COMMON = 2
+	EPR_VeryRare = 0,
+	EPR_Rare = 1,
+	EPR_Uncommon = 2,
+	EPR_Common = 3
 };
 
 USTRUCT(BlueprintType)

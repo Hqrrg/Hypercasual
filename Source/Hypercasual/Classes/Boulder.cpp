@@ -5,6 +5,7 @@
 #include "BoulderController.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Chaos/KinematicTargets.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -84,8 +85,17 @@ void ABoulder::Tick(float DeltaTime)
 	if (DistanceTravelled != LastVelocityIncreaseInterval && DistanceTravelled % VelocityIncreaseInterval == 0 && Acceleration < VelocityLimit)
 	{
 		LastVelocityIncreaseInterval = DistanceTravelled;
-		Acceleration+=50.0f;
-		Acceleration = UKismetMathLibrary::Clamp(Acceleration, 0, VelocityLimit);
+		
+		if (!IsVelocityBoosted)
+		{
+			Acceleration+=50.0f;
+			Acceleration = UKismetMathLibrary::Clamp(Acceleration, 0, VelocityLimit);
+		}
+		else
+		{
+			CachedAcceleration+=50.0f;
+			CachedAcceleration = UKismetMathLibrary::Clamp(CachedAcceleration, 0, CachedVelocityLimit);
+		}
 	}
 }
 
@@ -131,6 +141,12 @@ void ABoulder::CancelBuild(const FInputActionValue& Value)
 {
 	if (CurrentBarrier) CurrentBarrier = nullptr;
 	if (BuildTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(BuildTimerHandle);
+}
+
+void ABoulder::SetRemainingLives(int32 NewRemainingLives)
+{
+	RemainingLives = UKismetMathLibrary::Clamp(NewRemainingLives, 0, Lives);
+	OnUpdateLives.Broadcast(RemainingLives);
 }
 
 // Attempts to kill the player/end the session
@@ -185,22 +201,29 @@ void ABoulder::Move()
 }
 
 // Toggles the player's immune state
-void ABoulder::ToggleImmunity()
+void ABoulder::ToggleImmunity(bool Damaged, bool ForceImmune, float ImmunityDuration)
 {
-	Immune = !Immune;
+	if (!ForceImmune)
+	{
+		Immune = !Immune;
+	}
+	else
+	{
+		Immune = true;
+	}
+	
 	
 	if (Immune)
 	{
-		// Decrease game time to half - DISABLED | Sometimes does not trigger when toggling immunity in quick succession
-		//UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.5f);
-
-		Acceleration = DefaultAcceleration;
+		if (Damaged) Acceleration = DefaultAcceleration;
 		
 		// Set collision response for obstacle's to ignore
 		BoulderMeshComponent->SetCollisionResponseToChannel(OBSTACLE_COLLISION_CHANNEL, ECR_Ignore);
 
 		// Recursive function call after timer expiration, 1.0f = 2s due to time dilation
-		GetWorldTimerManager().SetTimer(ResetImmunityTimerHandle, this, &ABoulder::ToggleImmunity, 3.0f);
+		FTimerDelegate ResetImmunityTimerDelegate;
+		ResetImmunityTimerDelegate.BindUFunction(this, FName("ToggleImmunity"), false, false);
+		GetWorldTimerManager().SetTimer(ResetImmunityTimerHandle, ResetImmunityTimerDelegate, ImmunityDuration, false);
 		// Initialise looping timer to rapidly change the actor's visibility in game
 		GetWorldTimerManager().SetTimer(ToggleVisibilityTimerHandle, this, &ABoulder::ToggleVisibility, 0.1f, true, 0.0f);
 		
@@ -215,9 +238,7 @@ void ABoulder::ToggleImmunity()
 		BoulderMeshComponent->SetCollisionResponseToChannel(OBSTACLE_COLLISION_CHANNEL, ECR_Overlap);
 		// Ensure actor is visible
 		SetActorHiddenInGame(false);
-
-		// Reset game time to normal - DISABLED | Sometimes does not trigger when toggling immunity in quick succession
-		//UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
+		
 	}
 }
 
@@ -232,6 +253,59 @@ void ABoulder::StopPhysicsMovement()
 {
 	GetWorldTimerManager().ClearTimer(MovementTimerHandle);
 	BoulderMeshComponent->SetSimulatePhysics(false);
+}
+
+void ABoulder::ToggleTemporaryVelocityBoost(float Duration, bool ForceBoost)
+{
+	if (!IsVelocityBoosted)
+	{
+		CachedAcceleration = GetAcceleration();
+		CachedVelocityLimit = GetVelocityLimit();
+	}
+	
+	if (!ForceBoost)
+	{
+		IsVelocityBoosted = !IsVelocityBoosted;
+	}
+	else
+	{
+		IsVelocityBoosted = true;
+	}
+
+	if (IsVelocityBoosted)
+	{
+		SetAcceleration(VelocityBoostAcceleration);
+		SetVelocityLimit(VelocityBoostAcceleration);
+		
+		FTimerDelegate TemporaryVelocityBoostTimerDelegate;
+		TemporaryVelocityBoostTimerDelegate.BindUFunction(this, FName("ToggleTemporaryVelocityBoost"), Duration, false);
+		GetWorld()->GetTimerManager().SetTimer(TemporaryVelocityBoostTimerHandle, TemporaryVelocityBoostTimerDelegate, Duration, false);
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, FString("Slow"));
+		GetWorld()->GetTimerManager().ClearTimer(TemporaryVelocityBoostTimerHandle);
+
+		SetVelocityLimit(CachedVelocityLimit);
+		SetAcceleration(CachedAcceleration);
+		
+		GetWorld()->GetTimerManager().SetTimer(SlowTimerHandle, this, &ABoulder::Brake, 0.01, true);
+	}
+}
+
+void ABoulder::Brake()
+{
+	FVector Velocity = GetVelocity();
+	
+	if (Velocity.Normalize())
+	{
+		if (GetVelocity().Length() > Acceleration)
+		{
+			BoulderMeshComponent->AddForce(-Velocity * GetVelocity().Length(), NAME_None, true);
+			return;
+		}
+	}
+	GetWorldTimerManager().ClearTimer(SlowTimerHandle);
 }
 
 // Shifts the world origin to prevent floating point precision errors

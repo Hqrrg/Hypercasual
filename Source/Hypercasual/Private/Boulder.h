@@ -13,6 +13,8 @@
 #include "GameFramework/Pawn.h"
 #include "Boulder.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FUpdateLivesDelegate, int32, Lives);
+
 UCLASS()
 class HYPERCASUAL_API ABoulder : public APawn
 {
@@ -52,11 +54,28 @@ public:
 	FORCEINLINE int32 GetRemainingLives() { return RemainingLives; };
 	FORCEINLINE int32 GetLives() { return Lives; }
 	
+	void SetRemainingLives(int32 NewRemainingLives);
+	
+	UFUNCTION()
+	void ToggleImmunity(bool Damaged = true, bool ForceImmune = false, float ImmunityDuration = 3.0f);
+	
 	bool Kill();
 	void StopPhysicsMovement();
 
-	FORCEINLINE void SetVelocityLimit(float NewLimit) { Acceleration = NewLimit; }
+	FORCEINLINE float GetVelocityLimit() { return VelocityLimit; }
+	FORCEINLINE float GetAcceleration() { return Acceleration; }
+	FORCEINLINE void SetVelocityLimit(float NewLimit) { VelocityLimit = NewLimit; }
+	FORCEINLINE void SetAcceleration(float NewAcceleration) { Acceleration = NewAcceleration; }
 
+	UFUNCTION()
+	void ToggleTemporaryVelocityBoost(float Duration, bool ForceBoost);
+
+	UPROPERTY(BlueprintAssignable)
+	FUpdateLivesDelegate OnUpdateLives;
+	
+	bool Immune = false;
+	bool IsVelocityBoosted = false;
+	
 private:
 	UPROPERTY()
 	AHypercasualGameMode* HypercasualGameMode = nullptr;
@@ -68,6 +87,8 @@ private:
 	FTimerHandle MovementTimerHandle;
 	FTimerHandle ResetImmunityTimerHandle;
 	FTimerHandle ToggleVisibilityTimerHandle;
+	FTimerHandle TemporaryVelocityBoostTimerHandle;
+	FTimerHandle SlowTimerHandle;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Physics", meta = (AllowPrivateAccess = "true"))
 	float Acceleration = 200.0f;
@@ -76,10 +97,13 @@ private:
 	float DefaultAcceleration = Acceleration;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Physics", meta = (AllowPrivateAccess = "true"))
+	float VelocityBoostAcceleration = 800.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Physics", meta = (AllowPrivateAccess = "true"))
 	float VelocityLimit = 500.0f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Physics", meta = (AllowPrivateAccess = "true"))
-	int32 VelocityIncreaseInterval = 1000;
+	int32 VelocityIncreaseInterval = 500;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	int32 DistanceTravelled = 0;
@@ -91,8 +115,9 @@ private:
 
 	ABarrier* CurrentBarrier = nullptr;
 	int32 RemainingLives = Lives;
-	bool Immune = false;
 	float LastVelocityIncreaseInterval = 0.0f;
+	float CachedAcceleration = 0.0f;
+	float CachedVelocityLimit = 0.0f;
 	
 	UFUNCTION()
 	void ShiftWorldOrigin();
@@ -101,8 +126,8 @@ private:
 	void Move();
 
 	UFUNCTION()
-	void ToggleImmunity();
+	void ToggleVisibility();
 
 	UFUNCTION()
-	void ToggleVisibility();
+	void Brake();
 };

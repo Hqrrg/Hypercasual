@@ -3,8 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Boulder.h"
 #include "Components/BoxComponent.h"
+#include "Engine/DataTable.h"
+#include "NiagaraComponent.h"
 #include "GameFramework/Actor.h"
 #include "Pickup.generated.h"
 
@@ -16,23 +17,38 @@ enum EPickupRarity : uint8
 	EPR_COMMON = 2
 };
 
+USTRUCT(BlueprintType)
+struct FPickupInfo : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	UStaticMesh* StaticMesh = nullptr;
+	
+	UPROPERTY(EditAnywhere)
+	UMaterialInterface* Material = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* NiagaraSystem = nullptr;
+};
+
 UCLASS()
 class HYPERCASUAL_API APickup : public AActor
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, Category = "Appearance")
-	UStaticMeshComponent* PickupMeshComponent = nullptr;
-
-	UPROPERTY(EditAnywhere, Category = "Appearance")
-	UMaterialInterface* PickupMaterial = nullptr;
-
-	UPROPERTY(VisibleAnywhere)
-	UBoxComponent* PickupBoxComponent = nullptr;
-
 public:
 	// Sets default values for this actor's properties
 	APickup();
+
+	UPROPERTY(VisibleAnywhere, Category = "Appearance")
+	UStaticMeshComponent* PickupMeshComponent = nullptr;
+
+	UPROPERTY(EditAnywhere = "Appearance")
+	UNiagaraComponent* PickupNiagaraComponent = nullptr;
+	
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* PickupBoxComponent = nullptr;
 
 protected:
 	// Called when actor is constructed
@@ -46,11 +62,12 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
-	UPROPERTY(EditDefaultsOnly, Category = "Config")
-	TEnumAsByte<EPickupRarity> PickupRarity = EPR_COMMON;
-
 	UFUNCTION()
 	void BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 
-	virtual void PickedUp(ABoulder* Boulder);
+	virtual void PickedUp(class ABoulder* Boulder);
+
+public:
+	FPickupInfo* PickupInfo = nullptr;
+	inline static UDataTable* PickupInfoDataTable = nullptr;
 };

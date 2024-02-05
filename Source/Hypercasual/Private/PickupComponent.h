@@ -3,12 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/BillboardComponent.h"
+#include "Components/BoxComponent.h"
 #include "PickupComponent.generated.h"
 
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class HYPERCASUAL_API UPickupComponent : public UBillboardComponent
+class HYPERCASUAL_API UPickupComponent : public UBoxComponent
 {
 	GENERATED_BODY()
 
@@ -17,10 +17,10 @@ public:
 	UPickupComponent();
 
 protected:
+	virtual void OnComponentCreated() override;
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+private:
+	void SpawnPickup();
 };

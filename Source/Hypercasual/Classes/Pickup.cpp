@@ -2,6 +2,7 @@
 
 
 #include "Pickup.h"
+#include "Boulder.h"
 
 // Sets default values
 APickup::APickup()
@@ -10,26 +11,42 @@ APickup::APickup()
 	PrimaryActorTick.bCanEverTick = true;
 
 	PickupBoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("PickupBoxComponent"));
-	PickupBoxComponent->SetBoxExtent(FVector(8.0f, 32.0f, 32.0f));
+	PickupBoxComponent->SetBoxExtent(FVector(32.0f, 32.0f, 32.0f));
+	PickupBoxComponent->SetGenerateOverlapEvents(true);
 	SetRootComponent(PickupBoxComponent);
 	
 	PickupMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PickupMeshComponent"));
-	PickupMeshComponent->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f));
-	PickupMeshComponent->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
-	
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> PickupMeshAsset(TEXT("/Engine/BasicShapes/Plane.Plane"));
-	
-	if (PickupMeshAsset.Succeeded())
-	{
-		PickupMeshComponent->SetStaticMesh(PickupMeshAsset.Object);
-	}
+	PickupMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	PickupMeshComponent->SetCastShadow(false);
 	PickupMeshComponent->SetupAttachment(PickupBoxComponent);
+
+	PickupNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("PickupNiagaraComponent"));
+	PickupNiagaraComponent->SetRelativeLocation(FVector(0.0f, 0.0f, -PickupBoxComponent->GetUnscaledBoxExtent().Z));
+	PickupNiagaraComponent->SetupAttachment(PickupBoxComponent);
+
+	static ConstructorHelpers::FObjectFinder<UDataTable> PickupInfoDataTableAsset(TEXT("/Game/Hypercasual/DataTables/DT_PickupInfo.DT_PickupInfo"));
+
+	if (PickupInfoDataTableAsset.Succeeded())
+	{
+		PickupInfoDataTable = PickupInfoDataTableAsset.Object;
+	}
 }
 
 void APickup::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 	PickupBoxComponent->OnComponentBeginOverlap.AddDynamic(this, &APickup::BeginOverlap);
+
+	if (PickupInfo)
+	{
+		UStaticMesh* PickupMesh = PickupInfo->StaticMesh;
+		UMaterialInterface* PickupMaterial = PickupInfo->Material;
+		UNiagaraSystem* NiagaraSystem = PickupInfo->NiagaraSystem;
+	
+		if (PickupMesh) PickupMeshComponent->SetStaticMesh(PickupMesh);
+		if (PickupMaterial) PickupMeshComponent->SetMaterial(0, PickupMaterial);
+		if (NiagaraSystem) PickupNiagaraComponent->SetAsset(NiagaraSystem);
+	}
 }
 
 // Called when the game starts or when spawned

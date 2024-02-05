@@ -83,6 +83,10 @@ void AFollowCamera::CullingBoxEndOverlap(UPrimitiveComponent* OverlappedComponen
 			}
 		}
 	}
+	else if (APickup* OverlappedPickup = Cast<APickup>(OtherActor))
+	{
+		OverlappedPickup->Destroy();
+	}
 }
 
 

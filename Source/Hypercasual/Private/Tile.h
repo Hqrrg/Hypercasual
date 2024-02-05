@@ -10,6 +10,14 @@
 #include "GameFramework/Actor.h"
 #include "Tile.generated.h"
 
+UENUM(BlueprintType)
+enum ETileRarity : uint8
+{
+	ETR_Rare = 0,
+	ETR_Uncommon = 1,
+	ETR_Common = 2
+};
+
 UCLASS()
 class HYPERCASUAL_API ATile : public AActor
 {

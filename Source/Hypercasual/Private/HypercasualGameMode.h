@@ -4,17 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "HypercasualGameInstance.h"
+#include "Pickup.h"
 #include "Tile.h"
 #include "GameFramework/GameModeBase.h"
 #include "HypercasualGameMode.generated.h"
-
-UENUM(BlueprintType)
-enum ETileRarity : uint8
-{
-	ETR_Rare = 0,
-	ETR_Uncommon = 1,
-	ETR_Common = 2
-};
 
 UCLASS(minimalapi)
 class AHypercasualGameMode : public AGameModeBase
@@ -44,6 +37,9 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Tiles", meta = (AllowPrivateAccess = "true"))
 	TMap<TSubclassOf<ATile>, TEnumAsByte<ETileRarity>> TileFabs;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Pickups", meta = (AllowPrivateAccess = "true"))
+	TMap<TSubclassOf<APickup>, TEnumAsByte<EPickupRarity>> Pickups;
 	
 	UPROPERTY()
 	bool HasBeatenRecord = false;

@@ -24,5 +24,10 @@ void ALifePickup::BeginPlay()
 void ALifePickup::PickedUp(ABoulder* Boulder)
 {
 	Boulder->SetRemainingLives(Boulder->GetRemainingLives() + 1);
+
+	if (PickupInfo)
+	{
+		Boulder->BoulderNiagaraActor->SpawnNiagaraSystem(PickupInfo->BoulderNiagaraSystem);
+	}
 }
 

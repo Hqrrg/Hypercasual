@@ -33,17 +33,19 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
+	void SetUpgraded(bool IsUpgraded);
+	FORCEINLINE bool IsUpgraded() { return Upgraded; }
 	void AddNextPoint();
+	void Decay();
+	
+	FTimerHandle DecayTimerHandle;
 
 private:
-	int32 MAX_SPLINE_LENGTH = 150;
 	TArray<USplineMeshComponent*> BarrierMeshComps;
-	FTimerHandle DecayTimerHandle;
+	
+	int32 MaxSplineLength = 150;
 	FVector LastPointPosition;
-
+	bool Upgraded = false;
+	
 	void AddMeshComponents();
-	void Decay();
 };

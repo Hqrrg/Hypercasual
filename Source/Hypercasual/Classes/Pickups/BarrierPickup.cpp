@@ -25,4 +25,10 @@ void ABarrierPickup::BeginPlay()
 
 void ABarrierPickup::PickedUp(ABoulder* Boulder)
 {
+	Boulder->SetUpgradedBarrier(12.0f, true);
+	
+	if (PickupInfo)
+	{
+		Boulder->BoulderNiagaraActor->SpawnNiagaraSystem(PickupInfo->BoulderNiagaraSystem, 12.0f);
+	}
 }

@@ -62,6 +62,12 @@ void ABoulder::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+
+	FVector ActorLocation = GetActorLocation();
+	FVector SpawnLocation = FVector(ActorLocation.X, ActorLocation.Y, ActorLocation.Z-BoulderMesh->GetBoundingBox().GetSize().Z/2);
+	FTransform SpawnTransform = FTransform(FRotator(0.0f, 0.0f, 0.0f), SpawnLocation, FVector(1.0f, 1.0f, 1.0f));
+	BoulderNiagaraActor = GetWorld()->SpawnActor<ABoulderNiagaraActor>(ABoulderNiagaraActor::StaticClass(), SpawnTransform);
+	BoulderNiagaraActor->SetFollowActor(this);
 }
 
 // Called every frame
@@ -128,6 +134,7 @@ void ABoulder::Build(const FInputActionValue &Value)
 
 				// Spawn barrier at hit position
 				CurrentBarrier = GetWorld()->SpawnActor<ABarrier>(SpawnLoc, SpawnRot, SpawnParams);
+				CurrentBarrier->SetUpgraded(HasUpgradedBarrier);
 
 				// Initialise timer to recursively call the barrier's AddNextPoint function
 				GetWorldTimerManager().SetTimer(BuildTimerHandle, CurrentBarrier, &ABarrier::AddNextPoint, 0.01f, true, 0.0f);
@@ -139,7 +146,14 @@ void ABoulder::Build(const FInputActionValue &Value)
 // Nullify current barrier and clear build timer when input key is released
 void ABoulder::CancelBuild(const FInputActionValue& Value)
 {
-	if (CurrentBarrier) CurrentBarrier = nullptr;
+	if (CurrentBarrier)
+	{
+		if (CurrentBarrier->IsUpgraded())
+		{
+			GetWorldTimerManager().SetTimer(CurrentBarrier->DecayTimerHandle, CurrentBarrier, &ABarrier::Decay, 0.2f, true, 0.2f);
+		}
+		CurrentBarrier = nullptr;
+	}
 	if (BuildTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(BuildTimerHandle);
 }
 
@@ -283,13 +297,31 @@ void ABoulder::ToggleTemporaryVelocityBoost(float Duration, bool ForceBoost)
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, FString("Slow"));
 		GetWorld()->GetTimerManager().ClearTimer(TemporaryVelocityBoostTimerHandle);
 
 		SetVelocityLimit(CachedVelocityLimit);
 		SetAcceleration(CachedAcceleration);
-		
+
 		GetWorld()->GetTimerManager().SetTimer(BrakeTimerHandle, this, &ABoulder::Brake, 0.01, true);
+	}
+}
+
+void ABoulder::SetUpgradedBarrier(float Duration, bool IsUpgraded)
+{
+	HasUpgradedBarrier = IsUpgraded;
+
+	if (HasUpgradedBarrier)
+	{
+		FTimerDelegate ToggleUpgradedBarrierTimerDelegate;
+		ToggleUpgradedBarrierTimerDelegate.BindUFunction(this, FName("SetUpgradedBarrier"), Duration, false);
+		GetWorld()->GetTimerManager().SetTimer(UpgradedBarrierTimerHandle, ToggleUpgradedBarrierTimerDelegate, Duration, false);
+	}
+	else
+	{
+		if (GetWorld()->GetTimerManager().TimerExists(UpgradedBarrierTimerHandle))
+		{
+			GetWorld()->GetTimerManager().ClearTimer(UpgradedBarrierTimerHandle);
+		}
 	}
 }
 
@@ -297,12 +329,16 @@ void ABoulder::Brake()
 {
 	FVector Velocity = GetVelocity();
 	
-	if (Velocity.Normalize())
+	if (!IsVelocityBoosted)
 	{
-		if (GetVelocity().Length() > Acceleration)
+		if (Velocity.Normalize())
 		{
-			BoulderMeshComponent->AddForce(-Velocity * GetVelocity().Length(), NAME_None, true);
-			return;
+			if (GetVelocity().Length() > GetAcceleration())
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, FString::Printf(TEXT("%f, %f"), GetAcceleration(), GetVelocityLimit()));
+				BoulderMeshComponent->AddForce(-Velocity * GetVelocity().Length(), NAME_None, true);
+				return;
+			}
 		}
 	}
 	GetWorldTimerManager().ClearTimer(BrakeTimerHandle);

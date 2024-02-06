@@ -10,9 +10,6 @@
 // Sets default values
 ABarrier::ABarrier()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
 	BarrierSpline = CreateDefaultSubobject<USplineComponent>(TEXT("BarrierSpline"));
 	SetRootComponent(BarrierSpline);
 	BarrierSpline->ClearSplinePoints();
@@ -35,10 +32,11 @@ void ABarrier::BeginPlay()
 	Super::BeginPlay();
 }
 
-// Called every frame
-void ABarrier::Tick(float DeltaTime)
+void ABarrier::SetUpgraded(bool IsUpgraded)
 {
-	Super::Tick(DeltaTime);
+	Upgraded = IsUpgraded;
+
+	if (IsUpgraded) MaxSplineLength = 300.0f;
 }
 
 void ABarrier::AddNextPoint()
@@ -53,7 +51,7 @@ void ABarrier::AddNextPoint()
 			{
 				UPhysicalMaterial* PhysicalMaterial = OutHit->PhysMaterial.Get();
 
-				if (PhysicalMaterial->SurfaceType == EPhysicalSurface::SurfaceType1 && BarrierSpline->GetSplineLength() <= MAX_SPLINE_LENGTH)
+				if (PhysicalMaterial->SurfaceType == EPhysicalSurface::SurfaceType1 && BarrierSpline->GetSplineLength() <= MaxSplineLength)
 				{
 					const FVector BarrierMeshBoundingBoxSize = BarrierMesh->GetBoundingBox().GetSize();
 					
@@ -67,8 +65,7 @@ void ABarrier::AddNextPoint()
 						
 						LastPointPosition = PointPosition;
 					}
-
-					if (!DecayTimerHandle.IsValid())
+					if (!Upgraded && !DecayTimerHandle.IsValid())
 					{
 						GetWorldTimerManager().SetTimer(DecayTimerHandle, this, &ABarrier::Decay, 0.2f, true, 0.2f);
 					}

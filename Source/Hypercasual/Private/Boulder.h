@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Barrier.h"
+#include "BoulderNiagaraActor.h"
 #include "EnhancedInputSubsystemInterface.h"
 #include "HypercasualGameMode.h"
 #include "InputAction.h"
@@ -70,11 +71,17 @@ public:
 	UFUNCTION()
 	void ToggleTemporaryVelocityBoost(float Duration, bool ForceBoost);
 
+	UFUNCTION()
+	void SetUpgradedBarrier(float Duration, bool IsUpgraded);
+
 	UPROPERTY(BlueprintAssignable)
 	FUpdateLivesDelegate OnUpdateLives;
 	
 	bool Immune = false;
 	bool IsVelocityBoosted = false;
+
+	UPROPERTY()
+	ABoulderNiagaraActor* BoulderNiagaraActor = nullptr;
 	
 private:
 	UPROPERTY()

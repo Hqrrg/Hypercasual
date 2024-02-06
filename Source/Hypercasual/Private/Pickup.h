@@ -31,6 +31,9 @@ struct FPickupInfo : public FTableRowBase
 
 	UPROPERTY(EditAnywhere)
 	UNiagaraSystem* NiagaraSystem = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* BoulderNiagaraSystem = nullptr;
 };
 
 UCLASS()

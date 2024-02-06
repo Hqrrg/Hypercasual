@@ -3,6 +3,7 @@
 
 #include "FollowCamera.h"
 #include "Tile.h"
+#include "Barrier.h"
 #include "HypercasualGameMode.h"
 
 // Sets default values
@@ -86,6 +87,10 @@ void AFollowCamera::CullingBoxEndOverlap(UPrimitiveComponent* OverlappedComponen
 	else if (APickup* OverlappedPickup = Cast<APickup>(OtherActor))
 	{
 		OverlappedPickup->Destroy();
+	}
+	else if (ABarrier* OverlappedBarrier = Cast<ABarrier>(OtherActor))
+	{
+		OverlappedBarrier->Destroy();
 	}
 }
 

@@ -26,4 +26,9 @@ void AImmunityPickup::PickedUp(ABoulder* Boulder)
 {
 	Boulder->ToggleTemporaryVelocityBoost(3.0f, true);
 	Boulder->ToggleImmunity(false, true, 6.0f);
+
+	if (PickupInfo)
+	{
+		Boulder->BoulderNiagaraActor->SpawnNiagaraSystem(PickupInfo->BoulderNiagaraSystem, 6.0f);
+	}
 }

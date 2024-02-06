@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "..\Private\BoulderNiagaraActor.h"
 #include "NiagaraFunctionLibrary.h"
 
@@ -29,21 +28,26 @@ void ABoulderNiagaraActor::SetFollowActor(AActor* Actor)
 
 void ABoulderNiagaraActor::SpawnNiagaraSystem(UNiagaraSystem* NiagaraSystem, float Duration)
 {
+	if (IsDisplayingNiagaraSystem(NiagaraSystem)) return;
+	
 	UNiagaraComponent* NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(NiagaraSystem, SceneComponent, NAME_None, SceneComponent->GetComponentLocation(), SceneComponent->GetComponentRotation(), EAttachLocation::KeepWorldPosition, true, true);
 
 	if (NiagaraComponent)
 	{
 		NiagaraComponent->AttachToComponent(SceneComponent, FAttachmentTransformRules::KeepRelativeTransform);
+		ActiveNiagaraSystems.Add(NiagaraSystem);
 	}
 	
-	if (Duration > 0.0f)
-	{
-		FTimerHandle DestroyNiagaraComponentHandle;
-		FTimerDelegate DestroyNiagaraComponentDelegate;
-		DestroyNiagaraComponentDelegate.BindUFunction(this, FName("DestroyNiagaraComponent"), NiagaraComponent);
-	
-		GetWorld()->GetTimerManager().SetTimer(DestroyNiagaraComponentHandle, DestroyNiagaraComponentDelegate, Duration, false);
-	}
+	FTimerHandle DestroyNiagaraComponentHandle;
+	FTimerDelegate DestroyNiagaraComponentDelegate;
+	DestroyNiagaraComponentDelegate.BindUFunction(this, FName("DestroyNiagaraComponent"), NiagaraComponent);
+
+	GetWorld()->GetTimerManager().SetTimer(DestroyNiagaraComponentHandle, DestroyNiagaraComponentDelegate, Duration, false);
+}
+
+bool ABoulderNiagaraActor::IsDisplayingNiagaraSystem(UNiagaraSystem* NiagaraSystem)
+{
+	return ActiveNiagaraSystems.Contains(NiagaraSystem);
 }
 
 void ABoulderNiagaraActor::UpdateActorLocation()
@@ -58,6 +62,12 @@ void ABoulderNiagaraActor::UpdateActorLocation()
 
 void ABoulderNiagaraActor::DestroyNiagaraComponent(UNiagaraComponent* NiagaraComponent)
 {
+	UNiagaraSystem* NiagaraSystem = NiagaraComponent->GetAsset();
+	
+	if (IsDisplayingNiagaraSystem(NiagaraSystem))
+	{
+		ActiveNiagaraSystems.Remove(NiagaraSystem);
+	}
 	NiagaraComponent->UnregisterComponent();
 	NiagaraComponent->DestroyComponent();
 }

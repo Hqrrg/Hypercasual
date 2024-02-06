@@ -137,7 +137,7 @@ void ABoulder::Build(const FInputActionValue &Value)
 				CurrentBarrier->SetUpgraded(HasUpgradedBarrier);
 
 				// Initialise timer to recursively call the barrier's AddNextPoint function
-				GetWorldTimerManager().SetTimer(BuildTimerHandle, CurrentBarrier, &ABarrier::AddNextPoint, 0.01f, true, 0.0f);
+				GetWorldTimerManager().SetTimer(BuildTimerHandle, CurrentBarrier, &ABarrier::AddNextPoint, 0.001f, true, 0.0f);
 			}
 		}
 	}

@@ -27,7 +27,7 @@ void ALifePickup::PickedUp(ABoulder* Boulder)
 
 	if (PickupInfo)
 	{
-		Boulder->BoulderNiagaraActor->SpawnNiagaraSystem(PickupInfo->BoulderNiagaraSystem);
+		Boulder->BoulderNiagaraActor->SpawnNiagaraSystem(PickupInfo->BoulderNiagaraSystem, 1.0f);
 	}
 }
 

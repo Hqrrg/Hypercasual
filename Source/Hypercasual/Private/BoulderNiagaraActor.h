@@ -25,9 +25,14 @@ protected:
 
 public:
 	void SetFollowActor(AActor* Actor);
-	void SpawnNiagaraSystem(UNiagaraSystem* NiagaraSystem, float Duration = 0.0f);
+	void SpawnNiagaraSystem(UNiagaraSystem* NiagaraSystem, float Duration);
 
 private:
+	UPROPERTY()
+	TArray<UNiagaraSystem*> ActiveNiagaraSystems;
+
+	bool IsDisplayingNiagaraSystem(UNiagaraSystem* NiagaraSystem);
+	
 	UPROPERTY()
 	AActor* FollowActor = nullptr;
 

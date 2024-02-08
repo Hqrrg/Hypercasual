@@ -19,7 +19,7 @@ void UHypercasualGameInstance::SaveProfile()
 		FAsyncSaveGameToSlotDelegate SavedDelegate;
 		SavedDelegate.BindUObject(this, &UHypercasualGameInstance::SaveProfileDelegate);
 		
-		SaveGameInstance->HighScore = Record;
+		SaveGameInstance->HighScore = HighScore;
 		
 		UGameplayStatics::AsyncSaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex, SavedDelegate);
 	}
@@ -48,7 +48,7 @@ void UHypercasualGameInstance::LoadProfileDelegate(const FString &SlotName, cons
 {
 	if (UHypercasualSaveGame* LoadedGame = Cast<UHypercasualSaveGame>(LoadedGameData))
 	{
-		Record = LoadedGame->HighScore;
+		HighScore = LoadedGame->HighScore;
 		UE_LOG(LogTemp, Warning, TEXT("Profile loaded!"));
 	}
 

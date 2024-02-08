@@ -28,14 +28,20 @@ void ABoulderNiagaraActor::SetFollowActor(AActor* Actor)
 
 void ABoulderNiagaraActor::SpawnNiagaraSystem(UNiagaraSystem* NiagaraSystem, float Duration)
 {
-	if (IsDisplayingNiagaraSystem(NiagaraSystem)) return;
-	
-	UNiagaraComponent* NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(NiagaraSystem, SceneComponent, NAME_None, SceneComponent->GetComponentLocation(), SceneComponent->GetComponentRotation(), EAttachLocation::KeepWorldPosition, true, true);
+	UNiagaraComponent* NiagaraComponent;
+
+	if (IsDisplayingNiagara(NiagaraSystem))
+	{
+		NiagaraComponent = *ActiveNiagara.Find(NiagaraSystem);
+		DestroyNiagaraComponent(NiagaraComponent);
+	}
+
+	NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(NiagaraSystem, SceneComponent, NAME_None, SceneComponent->GetComponentLocation(), SceneComponent->GetComponentRotation(), EAttachLocation::KeepWorldPosition, true, true);
 
 	if (NiagaraComponent)
 	{
 		NiagaraComponent->AttachToComponent(SceneComponent, FAttachmentTransformRules::KeepRelativeTransform);
-		ActiveNiagaraSystems.Add(NiagaraSystem);
+		ActiveNiagara.Add(NiagaraSystem, NiagaraComponent);
 	}
 	
 	FTimerHandle DestroyNiagaraComponentHandle;
@@ -45,9 +51,9 @@ void ABoulderNiagaraActor::SpawnNiagaraSystem(UNiagaraSystem* NiagaraSystem, flo
 	GetWorld()->GetTimerManager().SetTimer(DestroyNiagaraComponentHandle, DestroyNiagaraComponentDelegate, Duration, false);
 }
 
-bool ABoulderNiagaraActor::IsDisplayingNiagaraSystem(UNiagaraSystem* NiagaraSystem)
+bool ABoulderNiagaraActor::IsDisplayingNiagara(UNiagaraSystem* NiagaraSystem)
 {
-	return ActiveNiagaraSystems.Contains(NiagaraSystem);
+	return ActiveNiagara.Contains(NiagaraSystem);
 }
 
 void ABoulderNiagaraActor::UpdateActorLocation()
@@ -62,11 +68,13 @@ void ABoulderNiagaraActor::UpdateActorLocation()
 
 void ABoulderNiagaraActor::DestroyNiagaraComponent(UNiagaraComponent* NiagaraComponent)
 {
+	if (!NiagaraComponent) return;
+	
 	UNiagaraSystem* NiagaraSystem = NiagaraComponent->GetAsset();
 	
-	if (IsDisplayingNiagaraSystem(NiagaraSystem))
+	if (IsDisplayingNiagara(NiagaraSystem))
 	{
-		ActiveNiagaraSystems.Remove(NiagaraSystem);
+		ActiveNiagara.Remove(NiagaraSystem);
 	}
 	NiagaraComponent->UnregisterComponent();
 	NiagaraComponent->DestroyComponent();

@@ -73,5 +73,6 @@ void APickup::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 
 void APickup::PickedUp(ABoulder* Boulder)
 {
+	Boulder->OnPickup.Broadcast(*PickupInfo);
 }
 

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ObstacleStaticMeshComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/SceneComponent.h"
@@ -42,10 +43,19 @@ public:
 	void SetPitch(float Pitch);
 
 private:
+	UPROPERTY()
 	AActor* FollowTarget = nullptr;
+
+	UPROPERTY()
 	APlayerController* PlayerController = nullptr;
+	
 	FVector Offset = FVector(0.0f, 0.0f, 0.0f);
 	
 	UFUNCTION()
 	void CullingBoxEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex);
+
+	UPROPERTY()
+	UObstacleStaticMeshComponent* VisibilityBlockingObstacle = nullptr;
+	
+	void EnsureFollowTargetIsVisible();
 };

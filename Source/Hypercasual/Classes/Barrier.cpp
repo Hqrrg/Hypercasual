@@ -4,6 +4,7 @@
 #include "Barrier.h"
 #include "Components/SplineMeshComponent.h"
 #include "BoulderController.h"
+#include "Boulder.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -58,16 +59,16 @@ void ABarrier::AddNextPoint()
 					if (const FVector Loc = OutHit->Location; (Loc-LastPointPosition).Length() >= BarrierMeshBoundingBoxSize.Length() && (Loc-BoulderController->GetPawn()->GetActorLocation()).Length() > BarrierMeshBoundingBoxSize.Length() + 10.0f)
 					{
 						FVector PointPosition = FVector(Loc.X, Loc.Y, Loc.Z + (BarrierMeshBoundingBoxSize.Z / 2));
- 
-						//Recursively call this function or another within this function to re-calculate spline points to be evenly spaced out.
-						BarrierSpline->AddSplinePoint(PointPosition, ESplineCoordinateSpace::World, true);
-						AddMeshComponents();
 						
-						LastPointPosition = PointPosition;
+						bool ShouldContinue = UpdateSplinePoints(LastPointPosition, PointPosition, BarrierMeshBoundingBoxSize.Length());
+						
+						if (!ShouldContinue) return;
+						
+						AddMeshComponents();
 					}
 					if (!Upgraded && !DecayTimerHandle.IsValid())
 					{
-						GetWorldTimerManager().SetTimer(DecayTimerHandle, this, &ABarrier::Decay, 0.2f, true, 0.2f);
+						GetWorldTimerManager().SetTimer(DecayTimerHandle, this, &ABarrier::Decay, 0.15f, true, 0.15f);
 					}
 					return;
 				}
@@ -75,16 +76,58 @@ void ABarrier::AddNextPoint()
 		}
 	}
 
-	// Force player to stop building spline
-	FViewport* Viewport = GEngine->GameViewport->Viewport;
+	// Force player to stop building spline 
+	if (BoulderController)
+	{
+		if (ABoulder* Boulder = Cast<ABoulder>(BoulderController->GetPawn()))
+		{
+			FInputActionValue Value;
+			Boulder->CancelBuild(Value);
+		}
+	}
+}
 
-	FInputKeyEventArgs KeyEventArgs = FInputKeyEventArgs(
-		Viewport,
-		UGameplayStatics::GetPlayerControllerID(BoulderController),
-		FKey(EKeys::LeftMouseButton.GetFName()),
-		EInputEvent::IE_Released);
+bool ABarrier::UpdateSplinePoints(FVector PointA, FVector PointB, float DesiredDistance)
+{
+	if (PointA == FVector::ZeroVector)
+	{
+		BarrierSpline->AddSplinePoint(PointB, ESplineCoordinateSpace::World, true);
+		LastPointPosition = PointB;
+		return false;
+	}
+	
+	float Distance = (PointB - PointA).Length();
+	int32 Div = FMath::Floor(Distance / DesiredDistance);
+	
+	if (Div > 1)
+	{
+		for (float i = 1; i < Div; i++)
+		{
+			FVector SplinePointLoc = FMath::Lerp(PointA, PointB, i/Div);
+			BarrierSpline->AddSplinePoint(SplinePointLoc, ESplineCoordinateSpace::World, true);
 
-	Viewport->GetClient()->InputKey(KeyEventArgs);
+			if (BarrierSpline->GetSplineLength() > MaxSplineLength)
+			{
+				BarrierSpline->RemoveSplinePoint(BarrierSpline->GetNumberOfSplinePoints()-1, true);
+				break;
+			}
+			LastPointPosition = SplinePointLoc;
+		}
+	}
+	else
+	{
+		BarrierSpline->AddSplinePoint(PointB, ESplineCoordinateSpace::World, true);
+
+		if (BarrierSpline->GetSplineLength() > MaxSplineLength)
+		{
+			BarrierSpline->RemoveSplinePoint(BarrierSpline->GetNumberOfSplinePoints()-1, true);
+			return false;
+		}
+		
+		LastPointPosition = PointB;
+		return true;
+	}
+	return true;
 }
 
 void ABarrier::AddMeshComponents()

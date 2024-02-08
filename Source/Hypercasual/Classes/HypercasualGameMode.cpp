@@ -5,8 +5,6 @@
 #include "Tile.h"
 #include "BoulderController.h"
 #include "FollowCamera.h"
-#include "Boulder.h"
-#include "VectorTypes.h"
 #include "Kismet/GameplayStatics.h"
 
 AHypercasualGameMode::AHypercasualGameMode()
@@ -94,13 +92,13 @@ ATile* AHypercasualGameMode::SpawnNextTile()
 	return LastTile;
 }
 
-void AHypercasualGameMode::EndGame_Implementation(int32 DistanceTravelled)
+void AHypercasualGameMode::EndGame_Implementation(float DistanceTravelled, bool HasNewNighScore)
 {
 	if (HypercasualGameInstance)
 	{
-		if (HypercasualGameInstance->Record < DistanceTravelled)
+		if (HypercasualGameInstance->HighScore < FMath::TruncToInt32(DistanceTravelled))
 		{
-			HypercasualGameInstance->Record = DistanceTravelled;
+			HypercasualGameInstance->HighScore = FMath::TruncToInt32(DistanceTravelled);
 			HypercasualGameInstance->SaveProfile();
 		}
 	}

@@ -46,6 +46,7 @@ private:
 	int32 MaxSplineLength = 150;
 	FVector LastPointPosition;
 	bool Upgraded = false;
-	
+
+	bool UpdateSplinePoints(FVector PointA, FVector PointB, float DesiredDistance);
 	void AddMeshComponents();
 };

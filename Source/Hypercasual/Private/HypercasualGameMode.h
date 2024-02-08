@@ -42,10 +42,10 @@ public:
 	TMap<TSubclassOf<APickup>, TEnumAsByte<EPickupRarity>> Pickups;
 	
 	UPROPERTY()
-	bool HasBeatenRecord = false;
+	bool HasNewHighScore = false;
 	
 	ATile* SpawnNextTile();
 
 	UFUNCTION(BlueprintNativeEvent)
-	void EndGame(int32 DistanceTravelled);
+	void EndGame(float DistanceTravelled, bool NewHighScore);
 };

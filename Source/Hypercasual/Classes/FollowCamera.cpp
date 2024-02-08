@@ -6,6 +6,8 @@
 #include "Barrier.h"
 #include "HypercasualGameMode.h"
 
+#define OBSTACLE_COLLISION_CHANNEL ECC_EngineTraceChannel1
+
 // Sets default values
 AFollowCamera::AFollowCamera()
 {
@@ -44,6 +46,8 @@ void AFollowCamera::Tick(float DeltaTime)
 		
 		SetActorLocation(NewActorLocation);
 		CameraComponent->SetWorldLocation(NewActorLocation + Offset);
+
+		EnsureFollowTargetIsVisible();
 	}
 }
 
@@ -91,6 +95,52 @@ void AFollowCamera::CullingBoxEndOverlap(UPrimitiveComponent* OverlappedComponen
 	else if (ABarrier* OverlappedBarrier = Cast<ABarrier>(OtherActor))
 	{
 		OverlappedBarrier->Destroy();
+	}
+}
+
+void AFollowCamera::EnsureFollowTargetIsVisible()
+{
+	if (FollowTarget)
+	{
+		FVector TraceStartLoc = CameraComponent->GetComponentLocation();
+		FVector TraceEndLoc = FollowTarget->GetActorLocation();
+
+		FHitResult* OutHit = new FHitResult();
+		FCollisionQueryParams QueryParams;
+		FCollisionObjectQueryParams ObjectQueryParams;
+		
+		ObjectQueryParams.AddObjectTypesToQuery(OBSTACLE_COLLISION_CHANNEL);
+
+		bool LineTrace = GetWorld()->LineTraceSingleByObjectType(
+			*OutHit,
+			TraceStartLoc,
+			TraceEndLoc,
+			ObjectQueryParams,
+			QueryParams);
+		
+		if (LineTrace)
+		{
+			if (UObstacleStaticMeshComponent* HitObstacleComponent = Cast<UObstacleStaticMeshComponent>(OutHit->GetComponent()))
+			{
+				if (VisibilityBlockingObstacle)
+				{
+					if (VisibilityBlockingObstacle != HitObstacleComponent)
+					{
+						VisibilityBlockingObstacle->SetPassthrough(false);
+					}
+				}
+				VisibilityBlockingObstacle = HitObstacleComponent;
+				if (!VisibilityBlockingObstacle->IsPassthrough) VisibilityBlockingObstacle->SetPassthrough(true);
+			}
+		}
+		else
+		{
+			if (VisibilityBlockingObstacle)
+			{
+				VisibilityBlockingObstacle->SetPassthrough(false);
+				VisibilityBlockingObstacle = nullptr;
+			}
+		}
 	}
 }
 

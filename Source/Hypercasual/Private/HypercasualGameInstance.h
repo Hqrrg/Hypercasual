@@ -11,7 +11,7 @@
  * 
  */
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FNewRecordDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FNewHighScoreDelegate);
 
 UCLASS()
 class HYPERCASUAL_API UHypercasualGameInstance : public UGameInstance
@@ -25,7 +25,7 @@ public:
 	UPROPERTY()
 	UHypercasualSaveGame* SaveGameInstance = nullptr;
 	
-	int32 Record = 0;
+	int32 HighScore = 0;
 
 	void SaveProfile();
 	void LoadProfile();
@@ -37,5 +37,5 @@ public:
 	void LoadProfileDelegate(const FString &SlotName, const int32 UserIndex, USaveGame* LoadedGameData);
 
 	UPROPERTY(BlueprintAssignable)
-	FNewRecordDelegate OnNewRecord;
+	FNewHighScoreDelegate OnNewHighScore;
 };

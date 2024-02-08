@@ -78,19 +78,19 @@ void ABoulder::Tick(float DeltaTime)
 	// Update distance travelled, dividing by 10 for a nicer number
 	DistanceTravelled = (GetActorLocation().X - SpawningLocationX) / 10;
 
-	const int32 CurrentHighScore = HypercasualGameMode->HypercasualGameInstance->Record;
+	const int32 CurrentHighScore = HypercasualGameMode->HypercasualGameInstance->HighScore;
 	
 	// If distance travelled is a new high score, notify listeners
-	if (!HypercasualGameMode->HasBeatenRecord && DistanceTravelled > CurrentHighScore && CurrentHighScore > 0)
+	if (!HypercasualGameMode->HasNewHighScore && DistanceTravelled > CurrentHighScore && CurrentHighScore > 0)
 	{
-		HypercasualGameMode->HypercasualGameInstance->OnNewRecord.Broadcast();
-		HypercasualGameMode->HasBeatenRecord = true;
+		HypercasualGameMode->HasNewHighScore = true;
+		HypercasualGameMode->HypercasualGameInstance->OnNewHighScore.Broadcast();
 	}
 
 	// If the current acceleration has not surpassed the velocity limit, increment it every specified interval of distance travelled
-	if (DistanceTravelled != LastVelocityIncreaseInterval && DistanceTravelled % VelocityIncreaseInterval == 0 && Acceleration < VelocityLimit)
+	if (FMath::TruncToInt32(DistanceTravelled) != LastVelocityIncreaseInterval && FMath::TruncToInt32(DistanceTravelled) % VelocityIncreaseInterval == 0 && Acceleration < VelocityLimit)
 	{
-		LastVelocityIncreaseInterval = DistanceTravelled;
+		LastVelocityIncreaseInterval = FMath::TruncToInt32(DistanceTravelled);
 		
 		if (!IsVelocityBoosted)
 		{
@@ -137,7 +137,7 @@ void ABoulder::Build(const FInputActionValue &Value)
 				CurrentBarrier->SetUpgraded(HasUpgradedBarrier);
 
 				// Initialise timer to recursively call the barrier's AddNextPoint function
-				GetWorldTimerManager().SetTimer(BuildTimerHandle, CurrentBarrier, &ABarrier::AddNextPoint, 0.001f, true, 0.0f);
+				GetWorldTimerManager().SetTimer(BuildTimerHandle, CurrentBarrier, &ABarrier::AddNextPoint, 0.01f, true, 0.0f);
 			}
 		}
 	}
@@ -150,7 +150,7 @@ void ABoulder::CancelBuild(const FInputActionValue& Value)
 	{
 		if (CurrentBarrier->IsUpgraded())
 		{
-			GetWorldTimerManager().SetTimer(CurrentBarrier->DecayTimerHandle, CurrentBarrier, &ABarrier::Decay, 0.2f, true, 0.2f);
+			GetWorldTimerManager().SetTimer(CurrentBarrier->DecayTimerHandle, CurrentBarrier, &ABarrier::Decay, 0.15f, true, 0.15f);
 		}
 		CurrentBarrier = nullptr;
 	}
@@ -170,12 +170,12 @@ bool ABoulder::Kill()
 	if (!Immune)
 	{
 		// Decrement lives by 1
-		RemainingLives--;
+		SetRemainingLives(GetRemainingLives()-1);
 
 		if (HypercasualGameMode)
 		{
 			// Give temporary immunity to the player if they have remaining lives
-			if (RemainingLives > 0)
+			if (GetRemainingLives() > 0)
 			{
 				ToggleImmunity();
 				return false;
@@ -183,7 +183,7 @@ bool ABoulder::Kill()
 
 			// Killed, end session
 			StopPhysicsMovement();
-			HypercasualGameMode->EndGame(DistanceTravelled);
+			HypercasualGameMode->EndGame(DistanceTravelled, HypercasualGameMode->HasNewHighScore);
 			return true;
 		}
 	}
@@ -201,7 +201,7 @@ void ABoulder::Move()
 	if (Velocity.Length() > 0)
 	{
 		// Change force direction to match that of velocity
-		ForceDirection = FVector(UKismetMathLibrary::Abs(Velocity.X), Velocity.Y, Velocity.Z);
+		ForceDirection = FVector(FMath::Abs(Velocity.X), Velocity.Y, Velocity.Z);
 	}
 	// Determine force to be applied based on the boulder's current velocity
 	const float ForceMultiplier = FMath::GetMappedRangeValueClamped(FVector2D(Acceleration-5, Acceleration), FVector2D(Acceleration, 0), Velocity.Length());
@@ -335,7 +335,6 @@ void ABoulder::Brake()
 		{
 			if (GetVelocity().Length() > GetAcceleration())
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, FString::Printf(TEXT("%f, %f"), GetAcceleration(), GetVelocityLimit()));
 				BoulderMeshComponent->AddForce(-Velocity * GetVelocity().Length(), NAME_None, true);
 				return;
 			}

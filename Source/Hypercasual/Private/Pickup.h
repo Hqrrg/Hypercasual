@@ -35,7 +35,6 @@ struct FPickupInfo : public FTableRowBase
 	UPROPERTY(EditAnywhere)
 	UNiagaraSystem* BoulderNiagaraSystem = nullptr;
 };
-
 UCLASS()
 class HYPERCASUAL_API APickup : public AActor
 {
@@ -63,6 +62,7 @@ protected:
 
 public:
 	// Called every frameW
+	
 	virtual void Tick(float DeltaTime) override;
 
 private:

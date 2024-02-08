@@ -15,6 +15,7 @@
 #include "Boulder.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FUpdateLivesDelegate, int32, Lives);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPickup, FPickupInfo, PickupInfo);
 
 UCLASS()
 class HYPERCASUAL_API ABoulder : public APawn
@@ -76,19 +77,23 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FUpdateLivesDelegate OnUpdateLives;
+
+	UPROPERTY(BlueprintAssignable)
+	FPickup OnPickup;
 	
 	bool Immune = false;
 	bool IsVelocityBoosted = false;
 
 	UPROPERTY()
 	ABoulderNiagaraActor* BoulderNiagaraActor = nullptr;
+
+	void CancelBuild(const FInputActionValue& Value);
 	
 private:
 	UPROPERTY()
 	AHypercasualGameMode* HypercasualGameMode = nullptr;
 	
 	void Build(const FInputActionValue& Value);
-	void CancelBuild(const FInputActionValue& Value);
 
 	FTimerHandle BuildTimerHandle;
 	FTimerHandle MovementTimerHandle;
@@ -114,16 +119,16 @@ private:
 	int32 VelocityIncreaseInterval = 500;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	int32 DistanceTravelled = 0;
+	float DistanceTravelled = 0.0f;
 	
-	int32 SpawningLocationX = 0;
+	float SpawningLocationX = 0.0f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Defaults", meta = (AllowPrivateAccess = "true"))
 	int32 Lives = 3;
 
 	ABarrier* CurrentBarrier = nullptr;
 	int32 RemainingLives = Lives;
-	float LastVelocityIncreaseInterval = 0.0f;
+	int32 LastVelocityIncreaseInterval = 0;
 	float CachedAcceleration = 0.0f;
 	float CachedVelocityLimit = 0.0f;
 	bool HasUpgradedBarrier = false;

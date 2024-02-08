@@ -29,9 +29,9 @@ public:
 
 private:
 	UPROPERTY()
-	TArray<UNiagaraSystem*> ActiveNiagaraSystems;
+	TMap<UNiagaraSystem*, UNiagaraComponent*> ActiveNiagara;
 
-	bool IsDisplayingNiagaraSystem(UNiagaraSystem* NiagaraSystem);
+	bool IsDisplayingNiagara(UNiagaraSystem* NiagaraSystem);
 	
 	UPROPERTY()
 	AActor* FollowActor = nullptr;

@@ -9,7 +9,7 @@ void UHypercasualGameInstance::Init()
 	Super::Init();
 	
 	SaveGameInstance = Cast<UHypercasualSaveGame>(UGameplayStatics::CreateSaveGameObject(UHypercasualSaveGame::StaticClass()));
-	LoadProfile();
+	ShouldDisplayMainMenu = true;
 }
 
 void UHypercasualGameInstance::SaveProfile()

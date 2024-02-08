@@ -37,7 +37,7 @@ void ABarrier::SetUpgraded(bool IsUpgraded)
 {
 	Upgraded = IsUpgraded;
 
-	if (IsUpgraded) MaxSplineLength = 300.0f;
+	if (IsUpgraded) MaxSplineLength = MaxSplineLength * 2;
 }
 
 void ABarrier::AddNextPoint()
@@ -89,6 +89,11 @@ void ABarrier::AddNextPoint()
 
 bool ABarrier::UpdateSplinePoints(FVector PointA, FVector PointB, float DesiredDistance)
 {
+	if (IsUpgraded())
+	{
+		DesiredDistance = DesiredDistance * 2;
+	}
+	
 	if (PointA == FVector::ZeroVector)
 	{
 		BarrierSpline->AddSplinePoint(PointB, ESplineCoordinateSpace::World, true);

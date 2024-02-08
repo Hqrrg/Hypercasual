@@ -18,7 +18,6 @@ ABoulder::ABoulder()
 	PrimaryActorTick.bCanEverTick = true;
 
 	BoulderMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BoulderMesh"));
-	BoulderMeshComponent->SetSimulatePhysics(true);
 	SetRootComponent(BoulderMeshComponent);
 
 	// Set collision response for obstacle's to overlap
@@ -50,9 +49,6 @@ void ABoulder::BeginPlay()
 	// Initialise timer for checking and shifting world origin
 	FTimerHandle ShiftWorldOriginTimerHandle;
 	GetWorldTimerManager().SetTimer(ShiftWorldOriginTimerHandle, this, &ABoulder::ShiftWorldOrigin, 5.0f, true);
-
-	// Initialise timer for physics movement
-	GetWorldTimerManager().SetTimer(MovementTimerHandle, this, &ABoulder::Move, 0.01f, true);
 
 	//Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
@@ -343,6 +339,14 @@ void ABoulder::Brake()
 	GetWorldTimerManager().ClearTimer(BrakeTimerHandle);
 }
 
+void ABoulder::BeginPhysicsMovement()
+{
+	BoulderMeshComponent->SetSimulatePhysics(true);
+	
+	// Initialise timer for physics movement
+	GetWorldTimerManager().SetTimer(MovementTimerHandle, this, &ABoulder::Move, 0.01f, true);
+}
+
 // Shifts the world origin to prevent floating point precision errors
 void ABoulder::ShiftWorldOrigin()
 {
@@ -361,5 +365,3 @@ void ABoulder::ShiftWorldOrigin()
 		SetActorLocation(FVector(0.0f, ActorLocation.Y, ActorLocation.Z));
 	}
 }
-
-

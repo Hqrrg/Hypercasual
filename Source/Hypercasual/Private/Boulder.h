@@ -144,4 +144,7 @@ private:
 
 	UFUNCTION()
 	void Brake();
+
+	UFUNCTION(BlueprintCallable)
+	void BeginPhysicsMovement();
 };

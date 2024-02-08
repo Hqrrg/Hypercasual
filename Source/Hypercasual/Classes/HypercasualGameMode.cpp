@@ -17,6 +17,7 @@ void AHypercasualGameMode::BeginPlay()
 	Super::BeginPlay();
 
 	HypercasualGameInstance = Cast<UHypercasualGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+	HypercasualGameInstance->LoadProfile();
 
 	if (SpawningTile)
 	{
@@ -45,7 +46,7 @@ APlayerController* AHypercasualGameMode::SpawnPlayerController(ENetRole InRemote
 
 		// Link camera to player controller
 		FollowCamera->SetPlayerController(BoulderController);
-		BoulderController->SetCamera(FollowCamera);	
+		BoulderController->SetCamera(FollowCamera);
 	}
 	
 	return PlayerController;

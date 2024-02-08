@@ -24,8 +24,12 @@ protected:
 public:
 	UPROPERTY()
 	UHypercasualSaveGame* SaveGameInstance = nullptr;
-	
+
+	UPROPERTY(BlueprintReadOnly)
 	int32 HighScore = 0;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool ShouldDisplayMainMenu;
 
 	void SaveProfile();
 	void LoadProfile();

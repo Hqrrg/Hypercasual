@@ -4,7 +4,9 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Tile.h"
 #include "BoulderController.h"
+#include "Boulder.h"
 #include "FollowCamera.h"
+#include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 
 AHypercasualGameMode::AHypercasualGameMode()
@@ -30,6 +32,23 @@ void AHypercasualGameMode::BeginPlay()
 	for (int32 i = 0; i < 4; i++)
 	{
 		SpawnNextTile();
+	}
+
+	if (MainMenuClass)
+	{
+		if (HypercasualGameInstance->ShouldDisplayMainMenu)
+		{
+			UUserWidget* MainMenu = CreateWidget<UUserWidget, APlayerController*>(UGameplayStatics::GetPlayerController(GetWorld(), 0), MainMenuClass->GetAuthoritativeClass());
+			MainMenu->AddToViewport();
+			
+			HypercasualGameInstance->ShouldDisplayMainMenu = false;
+		}
+		else
+		{
+			ABoulder* Boulder = Cast<ABoulder>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
+
+			if (Boulder) Boulder->BeginPhysicsMovement();
+		}
 	}
 }
 

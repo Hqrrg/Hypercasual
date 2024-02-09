@@ -40,6 +40,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Pickups", meta = (AllowPrivateAccess = "true"))
 	TMap<TSubclassOf<APickup>, TEnumAsByte<EPickupRarity>> Pickups;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Widgets", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UUserWidget> MainMenuClass = nullptr;
 	
 	UPROPERTY()
 	bool HasNewHighScore = false;

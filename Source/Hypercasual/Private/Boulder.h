@@ -62,6 +62,10 @@ public:
 	void ToggleImmunity(bool Damaged = true, bool ForceImmune = false, float ImmunityDuration = 3.0f);
 	
 	bool Kill();
+
+	UFUNCTION(BlueprintCallable)
+	void BeginPhysicsMovement();
+	
 	void StopPhysicsMovement();
 
 	FORCEINLINE float GetVelocityLimit() { return VelocityLimit; }
@@ -144,7 +148,4 @@ private:
 
 	UFUNCTION()
 	void Brake();
-
-	UFUNCTION(BlueprintCallable)
-	void BeginPhysicsMovement();
 };

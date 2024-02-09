@@ -8,7 +8,7 @@ public class Hypercasual : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay", "EnhancedInput", "Niagara" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay", "EnhancedInput", "Niagara", "UMG" });
 		PrivateDependencyModuleNames.AddRange(new string[] { "GeometryCollectionEngine", "ChaosSolverEngine" });
 	}
 }

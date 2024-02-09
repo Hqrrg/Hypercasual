@@ -225,7 +225,11 @@ void ABoulder::ToggleImmunity(bool Damaged, bool ForceImmune, float ImmunityDura
 	
 	if (Immune)
 	{
-		if (Damaged) Acceleration = DefaultAcceleration;
+		if (Damaged)
+		{
+			SetAcceleration(DefaultAcceleration);
+			GetWorld()->GetTimerManager().SetTimer(BrakeTimerHandle, this, &ABoulder::Brake, 0.01, true);
+		};
 		
 		// Set collision response for obstacle's to ignore
 		BoulderMeshComponent->SetCollisionResponseToChannel(OBSTACLE_COLLISION_CHANNEL, ECR_Ignore);

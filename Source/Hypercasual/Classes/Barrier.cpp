@@ -21,8 +21,6 @@ ABarrier::ABarrier()
 
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> BarrierMaterialAsset(TEXT("/Game/Hypercasual/Materials/Barrier/M_Barrier.M_Barrier"));
 	if (BarrierMaterialAsset.Succeeded()) BarrierMaterial = BarrierMaterialAsset.Object;
-	
-	if (BarrierMesh && BarrierMaterial) BarrierMesh->SetMaterial(0, BarrierMaterial);
 
 	LastPointPosition = FVector::ZeroVector;
 }
@@ -42,7 +40,22 @@ void ABarrier::SetUpgraded(bool IsUpgraded)
 
 void ABarrier::AddNextPoint()
 {
+
 	ABoulderController* BoulderController = Cast<ABoulderController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	
+	if (BarrierSpline->GetSplineLength() >= MaxSplineLength)
+	{
+		// Force player to stop building spline 
+		if (BoulderController)
+		{
+			if (ABoulder* Boulder = Cast<ABoulder>(BoulderController->GetPawn()))
+			{
+				FInputActionValue Value;
+				Boulder->CancelBuild(Value);
+			}
+		}
+		return;
+	}
 
 	if (BarrierMesh && BoulderController)
 	{
@@ -52,7 +65,7 @@ void ABarrier::AddNextPoint()
 			{
 				UPhysicalMaterial* PhysicalMaterial = OutHit->PhysMaterial.Get();
 
-				if (PhysicalMaterial->SurfaceType == EPhysicalSurface::SurfaceType1 && BarrierSpline->GetSplineLength() <= MaxSplineLength)
+				if (PhysicalMaterial->SurfaceType == EPhysicalSurface::SurfaceType1)
 				{
 					const FVector BarrierMeshBoundingBoxSize = BarrierMesh->GetBoundingBox().GetSize();
 					
@@ -70,19 +83,8 @@ void ABarrier::AddNextPoint()
 					{
 						GetWorldTimerManager().SetTimer(DecayTimerHandle, this, &ABarrier::Decay, 0.15f, true, 0.15f);
 					}
-					return;
 				}
 			}
-		}
-	}
-
-	// Force player to stop building spline 
-	if (BoulderController)
-	{
-		if (ABoulder* Boulder = Cast<ABoulder>(BoulderController->GetPawn()))
-		{
-			FInputActionValue Value;
-			Boulder->CancelBuild(Value);
 		}
 	}
 }
@@ -150,6 +152,7 @@ void ABarrier::AddMeshComponents()
 			BarrierMeshComponent = NewObject<USplineMeshComponent>(this, USplineMeshComponent::StaticClass());
 			
 			if (BarrierMesh) BarrierMeshComponent->SetStaticMesh(BarrierMesh);
+			if (BarrierMaterial) BarrierMeshComponent->SetMaterial(0, BarrierMaterial);
 
 			BarrierMeshComponent->SetMobility(EComponentMobility::Movable);
 			BarrierMeshComponent->AttachToComponent(BarrierSpline, FAttachmentTransformRules::KeepRelativeTransform);

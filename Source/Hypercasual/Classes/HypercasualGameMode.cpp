@@ -28,8 +28,8 @@ void AHypercasualGameMode::BeginPlay()
 		NextTileTransform = SpawningTileInstance->GetAttachPointTransform();
 	}
 
-	// Spawn 4 extra tiles at the start of the level
-	for (int32 i = 0; i < 4; i++)
+	// Spawn 5 extra tiles at the start of the level
+	for (int32 i = 0; i < 5; i++)
 	{
 		SpawnNextTile();
 	}

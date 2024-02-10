@@ -23,7 +23,7 @@ AFollowCamera::AFollowCamera()
 	CullingBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CullingBox"));
 	CullingBox->SetupAttachment(RootComponent);
 	CullingBox->SetBoxExtent(FVector(10.0f, 500.0f, 500.0f));
-	CullingBox->SetRelativeLocation(FVector(-500.0f, 0.0f, 0.0f));
+	CullingBox->SetRelativeLocation(FVector(-750.0f, 0.0f, 0.0f));
 }
 
 // Called when the game starts or when spawned

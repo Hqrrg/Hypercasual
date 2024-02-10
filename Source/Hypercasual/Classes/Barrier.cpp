@@ -4,10 +4,10 @@
 #include "Barrier.h"
 #include "Components/SplineMeshComponent.h"
 #include "BoulderController.h"
-#include "Boulder.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Kismet/GameplayStatics.h"
 
+#define BUILDING_PHYS_SURFACE EPhysicalSurface::SurfaceType1
 // Sets default values
 ABarrier::ABarrier()
 {
@@ -40,32 +40,15 @@ void ABarrier::SetUpgraded(bool IsUpgraded)
 
 void ABarrier::AddNextPoint()
 {
-
 	ABoulderController* BoulderController = Cast<ABoulderController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-	
-	if (BarrierSpline->GetSplineLength() >= MaxSplineLength)
-	{
-		// Force player to stop building spline 
-		if (BoulderController)
-		{
-			if (ABoulder* Boulder = Cast<ABoulder>(BoulderController->GetPawn()))
-			{
-				FInputActionValue Value;
-				Boulder->CancelBuild(Value);
-			}
-		}
-		return;
-	}
 
 	if (BarrierMesh && BoulderController)
 	{
 		if (FHitResult* OutHit = BoulderController->GetHitFromMousePosition())
 		{
-			if (OutHit->PhysMaterial.Get())
+			if (UPhysicalMaterial* PhysicalMaterial = OutHit->PhysMaterial.Get())
 			{
-				UPhysicalMaterial* PhysicalMaterial = OutHit->PhysMaterial.Get();
-
-				if (PhysicalMaterial->SurfaceType == EPhysicalSurface::SurfaceType1)
+				if (PhysicalMaterial->SurfaceType == BUILDING_PHYS_SURFACE)
 				{
 					const FVector BarrierMeshBoundingBoxSize = BarrierMesh->GetBoundingBox().GetSize();
 					
@@ -75,11 +58,25 @@ void ABarrier::AddNextPoint()
 						
 						bool ShouldContinue = UpdateSplinePoints(LastPointPosition, PointPosition, BarrierMeshBoundingBoxSize.Length());
 						
-						if (!ShouldContinue) return;
+						if (!ShouldContinue)
+						{
+							// Force release build input key
+							UGameViewportClient* ViewportClient = GetGameInstance()->GetGameViewportClient();
+							FViewport* Viewport = ViewportClient->Viewport;
+								
+							FInputKeyEventArgs Args = FInputKeyEventArgs(
+									Viewport,
+									0,
+									FKey(EKeys::LeftMouseButton),
+									IE_Released);
+
+							ViewportClient->InputKey(Args);
+							return;
+						}
 						
 						AddMeshComponents();
 					}
-					if (!Upgraded && !DecayTimerHandle.IsValid())
+					if (!Upgraded && !GetWorld()->GetTimerManager().TimerExists(DecayTimerHandle))
 					{
 						GetWorldTimerManager().SetTimer(DecayTimerHandle, this, &ABarrier::Decay, 0.15f, true, 0.15f);
 					}
@@ -100,7 +97,7 @@ bool ABarrier::UpdateSplinePoints(FVector PointA, FVector PointB, float DesiredD
 	{
 		BarrierSpline->AddSplinePoint(PointB, ESplineCoordinateSpace::World, true);
 		LastPointPosition = PointB;
-		return false;
+		return true;
 	}
 	
 	float Distance = (PointB - PointA).Length();
@@ -112,11 +109,11 @@ bool ABarrier::UpdateSplinePoints(FVector PointA, FVector PointB, float DesiredD
 		{
 			FVector SplinePointLoc = FMath::Lerp(PointA, PointB, i/Div);
 			BarrierSpline->AddSplinePoint(SplinePointLoc, ESplineCoordinateSpace::World, true);
-
+			
 			if (BarrierSpline->GetSplineLength() > MaxSplineLength)
 			{
 				BarrierSpline->RemoveSplinePoint(BarrierSpline->GetNumberOfSplinePoints()-1, true);
-				break;
+				return i > 1;
 			}
 			LastPointPosition = SplinePointLoc;
 		}
@@ -180,16 +177,19 @@ void ABarrier::AddMeshComponents()
 
 void ABarrier::Decay()
 {
-	if (BarrierMeshComps.Num() != 0)
+	if (BarrierMeshComps.Num() > 0)
 	{
 		USplineMeshComponent* SplineMeshComponent = nullptr;
 		
 		for (int32 i = 0; i < BarrierMeshComps.Num(); i++)
 		{
-			if (USplineMeshComponent* CurrentBarrierMesh = BarrierMeshComps[i]; CurrentBarrierMesh->IsRegistered() && !CurrentBarrierMesh->IsBeingDestroyed())
+			if (USplineMeshComponent* CurrentBarrierMesh = BarrierMeshComps[i])
 			{
-				SplineMeshComponent = CurrentBarrierMesh;
-				break;
+				if (CurrentBarrierMesh->IsRegistered() && !CurrentBarrierMesh->IsBeingDestroyed())
+				{
+					SplineMeshComponent = CurrentBarrierMesh;
+					break;
+				}
 			}
 		}
 

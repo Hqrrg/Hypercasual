@@ -41,6 +41,7 @@ void ABoulderNiagaraActor::SpawnNiagaraSystem(UNiagaraSystem* NiagaraSystem, flo
 	if (NiagaraComponent)
 	{
 		NiagaraComponent->AttachToComponent(SceneComponent, FAttachmentTransformRules::KeepRelativeTransform);
+		NiagaraComponent->RegisterComponent();
 		ActiveNiagara.Add(NiagaraSystem, NiagaraComponent);
 	}
 	

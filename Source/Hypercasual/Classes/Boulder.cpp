@@ -140,6 +140,8 @@ void ABoulder::Build(const FInputActionValue &Value)
 // Nullify current barrier and clear build timer when input key is released
 void ABoulder::CancelBuild(const FInputActionValue& Value)
 {
+	if (BuildTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(BuildTimerHandle);
+	
 	if (CurrentBarrier)
 	{
 		if (CurrentBarrier->IsUpgraded())
@@ -148,7 +150,6 @@ void ABoulder::CancelBuild(const FInputActionValue& Value)
 		}
 		CurrentBarrier = nullptr;
 	}
-	if (BuildTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(BuildTimerHandle);
 }
 
 void ABoulder::SetRemainingLives(int32 NewRemainingLives)
@@ -192,7 +193,7 @@ void ABoulder::Move()
 	FVector ForceDirection = FVector(1.0f, 0.0f, 0.0f);
 
 	// Moving
-	if (Velocity.Length() > 0)
+	if (Velocity.X > Acceleration / 3)
 	{
 		// Change force direction to match that of velocity
 		ForceDirection = FVector(FMath::Abs(Velocity.X), Velocity.Y, Velocity.Z);

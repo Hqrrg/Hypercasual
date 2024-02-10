@@ -41,6 +41,7 @@ public:
 	FTimerHandle DecayTimerHandle;
 
 private:
+	UPROPERTY()
 	TArray<USplineMeshComponent*> BarrierMeshComps;
 	
 	int32 MaxSplineLength = 150;

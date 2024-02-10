@@ -20,6 +20,8 @@ UObstacleStaticMeshComponent::UObstacleStaticMeshComponent()
 		static const FString ContextString(TEXT("Obstacle Info Context"));
 		ObstacleInfo = ObstacleInfoDataTable->FindRow<FObstacleInfo>(FName("Default"), ContextString, true);
 	}
+
+	SetBoundsScale(5.0f);
 }
 
 void UObstacleStaticMeshComponent::OnComponentCreated()

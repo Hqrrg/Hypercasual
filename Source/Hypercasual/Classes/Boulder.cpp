@@ -5,8 +5,6 @@
 #include "BoulderController.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "Chaos/KinematicTargets.h"
-#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
 #define OBSTACLE_COLLISION_CHANNEL ECC_EngineTraceChannel1
@@ -91,12 +89,12 @@ void ABoulder::Tick(float DeltaTime)
 		if (!IsVelocityBoosted)
 		{
 			Acceleration+=50.0f;
-			Acceleration = UKismetMathLibrary::Clamp(Acceleration, 0, VelocityLimit);
+			Acceleration = FMath::Clamp(Acceleration, 0, VelocityLimit);
 		}
 		else
 		{
 			CachedAcceleration+=50.0f;
-			CachedAcceleration = UKismetMathLibrary::Clamp(CachedAcceleration, 0, CachedVelocityLimit);
+			CachedAcceleration = FMath::Clamp(CachedAcceleration, 0, CachedVelocityLimit);
 		}
 	}
 }
@@ -213,24 +211,17 @@ void ABoulder::Move()
 // Toggles the player's immune state
 void ABoulder::ToggleImmunity(bool Damaged, bool ForceImmune, float ImmunityDuration)
 {
-	if (!ForceImmune)
-	{
-		Immune = !Immune;
-	}
-	else
-	{
-		Immune = true;
-	}
-	
+	if (!ForceImmune) Immune = !Immune;
+	else Immune = true;
 	
 	if (Immune)
 	{
 		if (Damaged)
 		{
+			// If immunity is a result of damage, reset acceleration and slow the player to match velocity
 			SetAcceleration(DefaultAcceleration);
 			GetWorld()->GetTimerManager().SetTimer(BrakeTimerHandle, this, &ABoulder::Brake, 0.01, true);
 		};
-		
 		// Set collision response for obstacle's to ignore
 		BoulderMeshComponent->SetCollisionResponseToChannel(OBSTACLE_COLLISION_CHANNEL, ECR_Ignore);
 

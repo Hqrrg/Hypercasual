@@ -196,7 +196,7 @@ void ABoulder::Move()
 	if (Velocity.X > Acceleration / 3)
 	{
 		// Change force direction to match that of velocity
-		ForceDirection = FVector(FMath::Abs(Velocity.X), Velocity.Y, Velocity.Z);
+		ForceDirection = FVector(FMath::Abs(Velocity.X), Velocity.Y, 0.0f);
 	}
 	// Determine force to be applied based on the boulder's current velocity
 	const float ForceMultiplier = FMath::GetMappedRangeValueClamped(FVector2D(Acceleration-5, Acceleration), FVector2D(Acceleration, 0), Velocity.Length());
@@ -208,6 +208,7 @@ void ABoulder::Move()
 		BoulderMeshComponent->AddForce(ForceDirection * ForceMultiplier, NAME_None, true);
 	}
 }
+
 
 // Toggles the player's immune state
 void ABoulder::ToggleImmunity(bool Damaged, bool ForceImmune, float ImmunityDuration)

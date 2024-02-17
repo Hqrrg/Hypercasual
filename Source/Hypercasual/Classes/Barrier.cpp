@@ -15,12 +15,18 @@ ABarrier::ABarrier()
 	SetRootComponent(BarrierSpline);
 	BarrierSpline->ClearSplinePoints();
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> BarrierMeshAsset(TEXT("/Game/Hypercasual/Meshes/SM_Barrier.SM_Barrier"));
+	static ConstructorHelpers::FObjectFinder<UDataTable> BarrierDataTableAsset(TEXT("/Game/Hypercasual/DataTables/DT_BarrierInfo.DT_BarrierInfo"));
 
-	if (BarrierMeshAsset.Succeeded()) BarrierMesh = BarrierMeshAsset.Object;
+	if (BarrierDataTableAsset.Succeeded())
+	{
+		BarrierDataTable = BarrierDataTableAsset.Object;
+	}
 
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> BarrierMaterialAsset(TEXT("/Game/Hypercasual/Materials/Barrier/M_Barrier.M_Barrier"));
-	if (BarrierMaterialAsset.Succeeded()) BarrierMaterial = BarrierMaterialAsset.Object;
+	if (BarrierDataTable)
+	{
+		static const FString ContextString(TEXT("Barrier Info Context"));
+		BarrierInfo = BarrierDataTable->FindRow<FBarrierInfo>(FName("Default"), ContextString, true);
+	}
 
 	LastPointPosition = FVector::ZeroVector;
 }
@@ -29,6 +35,17 @@ ABarrier::ABarrier()
 void ABarrier::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void ABarrier::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	if (BarrierInfo)
+	{
+		BarrierMesh = BarrierInfo->Mesh;
+		BarrierMaterial = BarrierInfo->Material;
+	}
 }
 
 void ABarrier::SetUpgraded(bool IsUpgraded)
@@ -52,7 +69,8 @@ void ABarrier::AddNextPoint()
 				{
 					const FVector BarrierMeshBoundingBoxSize = BarrierMesh->GetBoundingBox().GetSize();
 					
-					if (const FVector Loc = OutHit->Location; (Loc-LastPointPosition).Length() >= BarrierMeshBoundingBoxSize.Length() && (Loc-BoulderController->GetPawn()->GetActorLocation()).Length() > BarrierMeshBoundingBoxSize.Length() + 10.0f)
+					if (const FVector Loc = OutHit->Location; (Loc-LastPointPosition).Length() >= BarrierMeshBoundingBoxSize.Length()
+						&& (Loc-BoulderController->GetPawn()->GetActorLocation()).Length() > BarrierMeshBoundingBoxSize.Length() + 10.0f)
 					{
 						FVector PointPosition = FVector(Loc.X, Loc.Y, Loc.Z + (BarrierMeshBoundingBoxSize.Z / 2));
 						
@@ -86,20 +104,31 @@ void ABarrier::AddNextPoint()
 	}
 }
 
+// Calculate where to add new spline points
 bool ABarrier::UpdateSplinePoints(FVector PointA, FVector PointB, float DesiredDistance)
 {
 	if (IsUpgraded())
 	{
+		// Allow more distance between spline points if the barrier is upgraded for lag compensation
 		DesiredDistance = DesiredDistance * 2;
 	}
-	
+
+	// If this is the first spline point, skip checks
 	if (PointA == FVector::ZeroVector)
 	{
 		BarrierSpline->AddSplinePoint(PointB, ESplineCoordinateSpace::World, true);
 		LastPointPosition = PointB;
 		return true;
 	}
-	
+
+	/*
+	 * 1. Calculate how many times the desired distance goes into the distance between PointA & PointB (Div)
+	 * 2. If it's more than once, lerp between PointA & PointB, with "i/Div" as the alpha.
+	 * 
+	 * i/Div: e.g. 1/2 equates to 0.5 or halfway between the two points.
+	 * 
+	 * 3. Add new spline points until loop completes or maximum spline length is reached.
+	 */
 	float Distance = (PointB - PointA).Length();
 	int32 Div = FMath::Floor(Distance / DesiredDistance);
 	
@@ -118,6 +147,7 @@ bool ABarrier::UpdateSplinePoints(FVector PointA, FVector PointB, float DesiredD
 			LastPointPosition = SplinePointLoc;
 		}
 	}
+	// Distance between PointA & B is acceptable, add spline point as normal
 	else
 	{
 		BarrierSpline->AddSplinePoint(PointB, ESplineCoordinateSpace::World, true);

@@ -70,4 +70,7 @@ private:
 	UDataTable* BarrierDataTable = nullptr;
 	
 	FBarrierInfo* BarrierInfo = nullptr;
+
+	void LoadAssets(FName RowIdentifier);
+	void LoadAssets();
 };

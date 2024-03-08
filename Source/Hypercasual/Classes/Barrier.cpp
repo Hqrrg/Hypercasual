@@ -25,7 +25,7 @@ ABarrier::ABarrier()
 	if (BarrierDataTable)
 	{
 		static const FString ContextString(TEXT("Barrier Info Context"));
-		BarrierInfo = BarrierDataTable->FindRow<FBarrierInfo>(FName("Default"), ContextString, true);
+		BarrierInfo = BarrierDataTable->FindRow<FBarrierInfo>(FName(TEXT("Default")), ContextString, true);
 	}
 
 	LastPointPosition = FVector::ZeroVector;
@@ -40,19 +40,18 @@ void ABarrier::BeginPlay()
 void ABarrier::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-
-	if (BarrierInfo)
-	{
-		BarrierMesh = BarrierInfo->Mesh;
-		BarrierMaterial = BarrierInfo->Material;
-	}
+	LoadAssets();
 }
 
 void ABarrier::SetUpgraded(bool IsUpgraded)
 {
 	Upgraded = IsUpgraded;
 
-	if (IsUpgraded) MaxSplineLength = MaxSplineLength * 2;
+	if (IsUpgraded)
+	{
+		MaxSplineLength = MaxSplineLength * 2;
+		LoadAssets(FName(TEXT("Upgraded")));
+	}
 }
 
 void ABarrier::AddNextPoint()
@@ -166,17 +165,20 @@ bool ABarrier::UpdateSplinePoints(FVector PointA, FVector PointB, float DesiredD
 
 void ABarrier::AddMeshComponents()
 {
+	// Loop through every spline point
 	for (int32 i = 0; i < BarrierSpline->GetNumberOfSplinePoints()-1; i++)
 	{
 		BarrierSpline->GetSplinePointsPosition().Points[i].InterpMode = CIM_CurveAuto;
 		
 		USplineMeshComponent* BarrierMeshComponent = nullptr;
 
+		// If there is already a mesh component for this spline point, use this
 		if (BarrierMeshComps.Num() > i) BarrierMeshComponent = BarrierMeshComps[i];	
-		
+
+		// If there is not already a mesh at at the spline point, create one
 		if (!BarrierMeshComponent)
 		{
-			BarrierMeshComponent = NewObject<USplineMeshComponent>(this, USplineMeshComponent::StaticClass());
+			BarrierMeshComponent = NewObject<USplineMeshComponent>(this,USplineMeshComponent::StaticClass());
 			
 			if (BarrierMesh) BarrierMeshComponent->SetStaticMesh(BarrierMesh);
 			if (BarrierMaterial) BarrierMeshComponent->SetMaterial(0, BarrierMaterial);
@@ -190,20 +192,48 @@ void ABarrier::AddMeshComponents()
 			BarrierMeshComps.Add(BarrierMeshComponent);
 		}
 		
+		// Get start location & tangent at spline point
 		FVector StartLoc = FVector(0.0f, 0.0f, 0.0f);
 		FVector StartTan = FVector(0.0f, 0.0f, 0.0f);
 		BarrierSpline->GetLocationAndTangentAtSplinePoint(i, StartLoc, StartTan, ESplineCoordinateSpace::Local);
 
+		// Get end location & tangent at spline point
 		FVector EndLoc = FVector(0.0f, 0.0f, 0.0f);
 		FVector EndTan = FVector(0.0f, 0.0f, 0.0f);
 		BarrierSpline->GetLocationAndTangentAtSplinePoint(i+1, EndLoc, EndTan, ESplineCoordinateSpace::Local);
 
+		// Set barrier mesh start & end positions + tangents
 		BarrierMeshComponent->SetStartPosition(StartLoc);
 		BarrierMeshComponent->SetStartTangent(StartTan);
 		BarrierMeshComponent->SetEndPosition(EndLoc);
 		BarrierMeshComponent->SetEndTangent(EndTan);
 	}
 }
+
+// Load assets from data table, change row that it fetches data from
+void ABarrier::LoadAssets(FName RowIdentifier)
+{
+	static const FString ContextString(TEXT("Barrier Info Context"));
+	BarrierInfo = BarrierDataTable->FindRow<FBarrierInfo>(RowIdentifier, ContextString, true);
+
+	if (BarrierInfo)
+	{
+		// Assign assets to properties
+		LoadAssets();
+	}
+}
+
+// Load assets from data table
+void ABarrier::LoadAssets()
+{
+	// Assign assets to properties
+	if (BarrierInfo)
+	{
+		BarrierMesh = BarrierInfo->Mesh;
+		BarrierMaterial = BarrierInfo->Material;
+	}
+}
+
 
 void ABarrier::Decay()
 {
